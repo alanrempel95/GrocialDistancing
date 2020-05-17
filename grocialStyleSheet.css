@@ -1,0 +1,20 @@
+#wrap{
+    position: relative;
+    display: block; 
+    margin: 0px auto;
+    width: 1000px;
+}
+canvas {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    image-rendering: -webkit-optimize-contrast;
+}
+/*body {
+    width: 1000px;
+    height: 800px;
+}*/
+p {
+    font-family: fantasy;
+    font-size: 16px;
+}
