@@ -8,11 +8,13 @@ var ctx = canvas.getContext("2d");
 var bkgrnd = document.getElementById("background");
 var bgctx = bkgrnd.getContext("2d");
 
-canvas.width = document.documentElement.clientWidth - 50;
-canvas.height = document.documentElement.clientHeight - 100;
+canvas.width = groceryMap.tilesHigh * groceryMap.tileSize;
+canvas.height = groceryMap.tilesWide * groceryMap.tileSize;
+canvas.style.marginLeft = "-" + canvas.width / 2 + "px";
 
-bkgrnd.width = document.documentElement.clientWidth - 50;
-bkgrnd.height = document.documentElement.clientHeight - 100;
+bkgrnd.width = groceryMap.tilesHigh * groceryMap.tileSize;
+bkgrnd.height = groceryMap.tilesWide * groceryMap.tileSize;
+bkgrnd.style.marginLeft = "-" + bkgrnd.width / 2 + "px";
 
 ctx.imageSmoothingEnabled = false;
 bgctx.imageSmoothingEnabled = false;
@@ -33,8 +35,13 @@ canvas.addEventListener('mousedown', function (event) {
 canvas.addEventListener('mouseup', function (event) {
     "use strict";
     groceryMap.isDragging = false;
-    generateMapBlock(); //update paragraph when user finishes line 
+    //generateMapBlock(); //update paragraph when user finishes line 
 }, false);
+
+function hideMapGrid() {
+    var debugP = document.getElementById("debug");
+    debugP.innerHTML = "no map";
+}
 
 //initialize background/floor
 function populateMap() {
@@ -55,12 +62,12 @@ function populateMap() {
     for (i = 0; i < groceryMap.tilesHigh; i++) {
         for (j = 0; j < groceryMap.tilesWide; j++) {
             //floor is different shades of light gray
-            groceryMap.floorColor[i][j] = 255 - Math.random() * 50;
+            groceryMap.floorColor[j][i] = 255 - Math.random() * 50;
             
             if (Math.random() < 1) { //set to less than one to make other color randomly            
-                groceryMap.floorPlan[i][j] = "floor";
+                groceryMap.floorPlan[j][i] = 0; //floor
             } else {
-                groceryMap.floorPlan[i][j] = "unspecified";
+                groceryMap.floorPlan[j][i] = 2; //idk not floor or wall
             }
         }
     }
@@ -76,17 +83,17 @@ function drawGrid() {
         for (j = 0; j < groceryMap.tilesWide; j++) {
             bgctx.beginPath();
             bgctx.rect(i * groceryMap.tileSize, j * groceryMap.tileSize, groceryMap.tileSize, groceryMap.tileSize);
-            tileType = groceryMap.floorPlan[i][j];
+            tileType = groceryMap.floorPlan[j][i];
             
             switch (tileType) {
-            case "floor":
-                bgColor = groceryMap.floorColor[i][j];
+            case 0:
+                bgColor = groceryMap.floorColor[j][i];
                 bgctx.fillStyle = "rgb(" + bgColor + ", " + bgColor + ", " + bgColor + ")";
                 break;
-            case "wall":
+            case 1:
                 bgctx.fillStyle = "green";
                 break;
-            case "unspecified":
+            case 2:
                 bgctx.fillStyle = "blue";
                 break;
             default:
@@ -106,7 +113,7 @@ function userPopulateMap() {
         k = Math.floor(groceryMap.mouseX / groceryMap.tileSize);
         l = Math.floor(groceryMap.mouseY / groceryMap.tileSize);
 
-        groceryMap.floorPlan[k][l] = "wall";
+        groceryMap.floorPlan[l][k] = 1; //wall
     }
 }
 
@@ -143,12 +150,12 @@ function generateMapBlock() {
         pText = "[[",
         debugP = document.getElementById("debug"),
         tempText = "";
-    for (i = 0; i < groceryMap.tilesHigh; i++) {
-        for (j = 0; j < groceryMap.tilesWide; j++) {
+    for (i = 0; i < groceryMap.tilesWide; i++) {
+        for (j = 0; j < groceryMap.tilesHigh; j++) {
             tempText = groceryMap.floorPlan[i][j];
-            pText += "\"" + tempText + "\"";
-            if (j === groceryMap.tilesWide - 1) {
-                if (i === groceryMap.tilesHigh - 1) {
+            pText += tempText;
+            if (j === groceryMap.tilesHigh - 1) {
+                if (i === groceryMap.tilesWide - 1) {
                     pText += "]]"; //last thing
                 } else {
                     pText += "],<br />["; //end of row
