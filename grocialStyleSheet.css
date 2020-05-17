@@ -1,6 +1,6 @@
 #wrap{
     position: relative;
-    display: block; 
+    display: inline-block; 
     margin: 0px auto;
     width: 1000px;
 }
@@ -16,5 +16,5 @@ canvas {
 }*/
 p {
     font-family: fantasy;
-    font-size: 16px;
+    font-size: 12px;
 }

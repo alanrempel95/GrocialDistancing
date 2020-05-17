@@ -17,23 +17,6 @@ bkgrnd.height = document.documentElement.clientHeight - 100;
 ctx.imageSmoothingEnabled = false;
 bgctx.imageSmoothingEnabled = false;
 
-//global object
-var groceryMap = {
-    tileSize: 30,
-    tilesHigh: 30,
-    tilesWide: 20,
-    mouseX: 0,
-    mouseY: 0,
-    isDragging: false
-};
-
-//template for people - @Jordan feel free to change
-var personTemp = {
-    personRadius: 15,
-    personX: 300,
-    personY: 300
-};
-
 //i hate event handling - store mouse position in global
 canvas.addEventListener('mousemove', function (event) {
     "use strict";
@@ -141,30 +124,16 @@ function showCursor() {
     ctx.fill();
 }
 
-//@jordan - this one's all you. Mockup function only
-function handlePerson() {
+function drawPerson() {
     "use strict";
-    var maxX, maxY, velX, velY = 0;
-    
-    maxX = groceryMap.tilesWide * groceryMap.tileSize;
-    maxY = groceryMap.tilesHigh * groceryMap.tileSize;
-    velX = 5 - 10 * Math.random();
-    velY = 5 - 10 * Math.random();
-    if (personTemp.personX > 0 && personTemp.personX < maxX) {
-        personTemp.personX = personTemp.personX + velX;
+    var i = 0;
+    for (i = 0; i < groceryMap.numberOfPeople; i++) {
+        handlePerson(groceryMap.tilesWide * groceryMap.tileSize, groceryMap.tilesHigh * groceryMap.tileSize, groceryMap.People[i]);
+        ctx.beginPath();
+        ctx.arc(groceryMap.People[i].personX, groceryMap.People[i].personY, groceryMap.People[i].personRadius, 0, 2 * Math.PI, false);
+        ctx.fillStyle = "purple";
+        ctx.fill();
     }
-    if (personTemp.personY > 0 && personTemp.personY < maxY) {
-        personTemp.personY = personTemp.personY + velY;
-    }
-    personTemp.personX = Math.max(1, personTemp.personX);
-    personTemp.personX = Math.min(maxX - 1, personTemp.personX);
-    personTemp.personY = Math.max(1, personTemp.personY);
-    personTemp.personY = Math.min(maxY - 1, personTemp.personY);
-    
-    ctx.beginPath();
-    ctx.arc(personTemp.personX, personTemp.personY, personTemp.personRadius, 0, 2 * Math.PI, false);
-    ctx.fillStyle = "purple";
-    ctx.fill();
 }
 
 //from existing map, generates static array we can copy into program
@@ -176,17 +145,17 @@ function generateMapBlock() {
         tempText = "";
     for (i = 0; i < groceryMap.tilesHigh; i++) {
         for (j = 0; j < groceryMap.tilesWide; j++) {
-            tempText = groceryMap.floorPlan[i][j]
-            pText += "\"" + tempText + "\""
+            tempText = groceryMap.floorPlan[i][j];
+            pText += "\"" + tempText + "\"";
             if (j === groceryMap.tilesWide - 1) {
                 if (i === groceryMap.tilesHigh - 1) {
                     pText += "]]"; //last thing
                 } else {
-                    pText += "], ["; //end of row
+                    pText += "],<br />["; //end of row
                 }
             } else {
                 pText += ", "; //continuation of row
-            }   
+            }
         }
     }
     debugP.innerHTML = pText;
@@ -199,10 +168,12 @@ function gameLoop() {
     userPopulateMap();
     showCursor();
     drawGrid();
-    handlePerson();
+    drawPerson();
     window.requestAnimationFrame(gameLoop);
 }
 
 window.requestAnimationFrame(gameLoop);
+//functions here run once at the start
 populateMap();
+createPeople();
 //drawGrid();
