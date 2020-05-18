@@ -8,6 +8,7 @@ var ctx = canvas.getContext("2d");
 var bkgrnd = document.getElementById("background");
 var bgctx = bkgrnd.getContext("2d");
 
+//set margin to -half_width and left:50% to vertically center
 canvas.width = groceryMap.tilesHigh * groceryMap.tileSize;
 canvas.height = groceryMap.tilesWide * groceryMap.tileSize;
 canvas.style.marginLeft = "-" + canvas.width / 2 + "px";
@@ -18,6 +19,10 @@ bkgrnd.style.marginLeft = "-" + bkgrnd.width / 2 + "px";
 
 ctx.imageSmoothingEnabled = false;
 bgctx.imageSmoothingEnabled = false;
+
+//element below absolute positioned canvases needs top margin offset
+var bottomDiv = document.getElementById("bottom");
+bottomDiv.style.marginTop = 20 + canvas.height + "px";
 
 //i hate event handling - store mouse position in global
 canvas.addEventListener('mousemove', function (event) {
@@ -40,10 +45,13 @@ canvas.addEventListener('mouseup', function (event) {
     //generateMapBlock(); //update paragraph when user finishes line 
 }, false);
 
-function hideMapGrid() {
-    "use strict";
-    var debugP = document.getElementById("debug");
-    debugP.innerHTML = "no map";
+function toggleScreen() {
+    var elem = document.documentElement;
+    if (document.fullscreenElement === null) {
+        elem.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
 }
 
 function changeMode(myMode) {
@@ -175,7 +183,7 @@ function drawPerson() {
 }
 
 //from existing map, generates static array we can copy into program
-function generateMapBlock() {
+function toggleMapBlock() {
     "use strict";
     var i, j = 0,
         pText = "[[",
@@ -196,7 +204,12 @@ function generateMapBlock() {
             }
         }
     }
-    debugP.innerHTML = pText;
+    if (groceryMap.showGrid) {
+        debugP.innerHTML = pText;
+    } else {
+        debugP.innerHTML = "no map";
+    }
+    groceryMap.showGrid = !groceryMap.showGrid;
 }
 
 //clear, update, target 60 fps by default

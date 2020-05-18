@@ -8,7 +8,8 @@ var groceryMap = {
     isDragging: false,
     mouseButton: -1,
     numberOfPeople: 10,
-    mode: "user"
+    mode: "user",
+    showGrid: true
 };
 
 var map1 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

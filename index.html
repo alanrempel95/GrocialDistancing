@@ -6,12 +6,13 @@
         <link rel="stylesheet" type="text/css" href="grocialStylesheet.css"/>
     </head>
     <body>
-        <p id="debug">hello world</p>
-        <button onclick="generateMapBlock();">Show Map Grid</button>
-        <button onclick="hideMapGrid();">Hide Map Grid</button>
-        <button onclick="changeMode(1)">User Edit</button>
-        <button onclick="populateMap();">Clear Map</button>
-        <button onclick="showMap(1);">Map 1</button>
+        <div class="wrapper">
+            <button class="top" onclick="toggleMapBlock();">Toggle Map Grid</button>
+            <button class="top" onclick="changeMode(1)">User Edit</button>
+            <button class="top" onclick="populateMap();">Clear Map</button>
+            <button class="top" onclick="showMap(1);">Map 1</button>
+            <button class="top" onclick="toggleScreen();">Toggle Full Screen</button>
+        </div>
         <div id="wrap">
             <canvas id="background" style="z-index: 1">
                 //this is the tiled/battle background
@@ -19,6 +20,18 @@
             <canvas id="canvas" style="z-index: 2">
                 //this is the canvas that changes
             </canvas>
+        </div>
+        <div class="wrapper" id="bottom">
+            <form>
+                <label for="population">Max Shoppers</label>
+                <input type="number" id="population" value=10><br>
+                <label for="distance">Mandated Separation</label>
+                <input type="number" id="distance" value=2><br>
+                <label for="placeholder">Something Else</label>
+                <input type="text" id="placeholder" value="yo fam"><br>
+                <button class="inForm">Start Simulation</button>
+            </form>
+            <p id="debug">hello world</p>
         </div>
         <script type="text/javascript" src = "globals.js"></script>
         <script type="text/javascript" src = "pathfinding.js"></script>
