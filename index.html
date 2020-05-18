@@ -9,7 +9,9 @@
         <p id="debug">hello world</p>
         <button onclick="generateMapBlock();">Show Map Grid</button>
         <button onclick="hideMapGrid();">Hide Map Grid</button>
-        <button>Map 1</button>
+        <button onclick="changeMode(1)">User Edit</button>
+        <button onclick="populateMap();">Clear Map</button>
+        <button onclick="showMap(1);">Map 1</button>
         <div id="wrap">
             <canvas id="background" style="z-index: 1">
                 //this is the tiled/battle background

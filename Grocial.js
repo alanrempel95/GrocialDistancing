@@ -30,17 +30,45 @@ canvas.addEventListener('mousemove', function (event) {
 canvas.addEventListener('mousedown', function (event) {
     "use strict";
     groceryMap.isDragging = true;
+    groceryMap.mouseButton = event.button;
 }, false);
 
 canvas.addEventListener('mouseup', function (event) {
     "use strict";
     groceryMap.isDragging = false;
+    groceryMap.mouseButton = -1; //reset button index 
     //generateMapBlock(); //update paragraph when user finishes line 
 }, false);
 
 function hideMapGrid() {
+    "use strict";
     var debugP = document.getElementById("debug");
     debugP.innerHTML = "no map";
+}
+
+function changeMode(myMode) {
+    "use strict";
+    if (myMode === 1) {
+        groceryMap.mode = "user";
+    } else {
+        groceryMap.mode = "fixed";
+    }
+}
+
+function showMap(mySelection) {
+    "use strict";
+    switch (mySelection) {
+    case 1:
+        groceryMap.floorPlan = map1.map(function (arr) {
+            return arr.slice();
+        });
+        changeMode(2);
+        break;
+    default:
+        groceryMap.floorPlan = map1.map(function (arr) {
+            return arr.slice();
+        });
+    }
 }
 
 //initialize background/floor
@@ -99,7 +127,6 @@ function drawGrid() {
             default:
                 bgctx.fillStyle = "black";
             }
-            
             bgctx.fill();
         }
     }
@@ -112,8 +139,12 @@ function userPopulateMap() {
     if (groceryMap.isDragging) {
         k = Math.floor(groceryMap.mouseX / groceryMap.tileSize);
         l = Math.floor(groceryMap.mouseY / groceryMap.tileSize);
-
-        groceryMap.floorPlan[l][k] = 1; //wall
+        
+        if (groceryMap.mouseButton === 0) {
+            groceryMap.floorPlan[l][k] = 1; //wall
+        } else if (groceryMap.mouseButton === 2) {
+            groceryMap.floorPlan[l][k] = 2; //idk something else
+        }
     }
 }
 
@@ -172,8 +203,10 @@ function generateMapBlock() {
 function gameLoop() {
     "use strict";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    userPopulateMap();
-    showCursor();
+    if (groceryMap.mode === "user") {
+        userPopulateMap();
+        showCursor();
+    }
     drawGrid();
     drawPerson();
     window.requestAnimationFrame(gameLoop);
