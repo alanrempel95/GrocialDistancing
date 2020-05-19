@@ -1,9 +1,10 @@
 //constructor for people
-function Person(Radius, X, Y) {
+function Person(Radius, X, Y, turn) {
     "use strict";
     this.personRadius = Radius;
     this.personX = X;
     this.personY = Y;
+    this.personTurnRad = turn
 }
 
 function createPeople() {
@@ -32,6 +33,26 @@ function handlePerson(maxX, maxY, myPerson) {
     myPerson.personX = Math.min(maxX - 1, myPerson.personX);
     myPerson.personY = Math.max(1, myPerson.personY);
     myPerson.personY = Math.min(maxY - 1, myPerson.personY);
+}
+
+/* init is the (x,y) of the initial position
+   end is the (x,y) of the end position
+   initdir is the initial direction (in radians)
+   enddir is the end direction(in radians)
+*/
+function curveDist(person, initdir, end, enddir){
+    var init = [person.personX, person.personY];
+    var radius = person.personTurnRad;
+
+    var init_right_ang = initdir - 90;
+    var init_right_O = [init[0] + radius * Math.cos(init_right_ang), init[1] + radius * Math.sin(init_right_ang)];
+    
+    var h = distance(init_right_O, end);
+    if(h < radius){
+        return false
+    }
+    
+    
 }
 
 function distance(node, goal){
