@@ -4,14 +4,14 @@ function Person(Radius, X, Y, turn) {
     this.personRadius = Radius;
     this.personX = X;
     this.personY = Y;
-    this.personTurnRad = turn
+    this.personTurnRad = turn;
 }
 
 function createPeople() {
     "use strict";
     var i = 0;
     groceryMap.People = new Array(groceryMap.numberOfPeople);
-    for (i = 0; i < groceryMap.numberOfPeople; i++) {
+    for (var i = 0; i < groceryMap.numberOfPeople; i++) {
         groceryMap.People[i] = new Person(15 + 3 * Math.random(), 300 + 200 * Math.random(), 300 + 200 * Math.random());
     }
 }
@@ -35,6 +35,15 @@ function handlePerson(maxX, maxY, myPerson) {
     myPerson.personY = Math.min(maxY - 1, myPerson.personY);
 }
 
+function testAStar() {
+    var myPerson = groceryMap.People[1];
+    var myGoal = [10, 25];
+    var myPath = getAPath(myPerson, myGoal);
+    for (var i = 0; i < myPath.length; i++) {
+        console.log(myPath[i]);
+    }
+}
+
 /* Returns the length of the least curved path (curve, then straight) from 
    initial to end point given a starting orientation on the initial point and 
    a turn radius for the initial curve. Acts only as the heuristic, and hence, 
@@ -47,7 +56,7 @@ function handlePerson(maxX, maxY, myPerson) {
 */
 function heuristicCurve(init, initdir, end, turn_rad){
     var paths = new Array(2);
-    for(i = 0; i < 2; i++){
+    for(var i = 0; i < 2; i++){
         if(i == 0){
             var init_ang = (initdir - (Math.PI / 2)) % (2 * Math.PI);
         }
@@ -98,8 +107,8 @@ function nodePath(init, init_dir, end, end_dir, turn_rad){
 
 function getBlocked(person){
     var blocks = [];
-    for(r = 0; r < groceryMap.tilesWide; r++){
-        for(c = 0; c < groceryMap.tilesHigh; c++){
+    for(var r = 0; r < groceryMap.tilesWide; r++){
+        for(var c = 0; c < groceryMap.tilesHigh; c++){
             if(groceryMap.floorPlan[r][c] != 0){
                 var left = groceryMap.tileSize * r - person.personRadius;
                 var right = groceryMap.tileSize * (r + 1) + person.personRadius;
@@ -121,15 +130,16 @@ function getAPath(person, goal){
     // Create the 60 by 60 grid. Then, for each node, create an array that 
     // holds node stats. 
     var nodes = new Array(60);
-    for(i = 0; i < 60; i++){
+    for(var i = 0; i < 60; i++){
         nodes[i] = new Array(60);
     }
-    for(r = 0; r < 60; r++){
-        for(c = 0; c < 60; c++){
+    for(var r = 0; r < 60; r++){
+        for(var c = 0; c < 60; c++){
             nodes[r][c] = new Array(6);
         }
     }
-
+    debuggy("here i am");
+    debugger;
     /* Establish the stats as follows:
             - In 0, hold a boolean declaring if this node is reachable (not within 
                 or too close to an obstacle). After 1 (below) is calculated, 
@@ -148,9 +158,9 @@ function getAPath(person, goal){
     */
     var x_unit = (goal[0] - person.personX) / 59.0;
     var y_unit = (goal[1] - person.personY) / 59.0;
-    var blocks = getBlocked(player);
-    for(r = 0; r < 60; r++){
-        for(c = 0; c < 60; c++){
+    var blocks = getBlocked(person);
+    for(var r = 0; r < 60; r++){
+        for(var c = 0; c < 60; c++){
             var x_dist = c * x_unit;
             var x_pos = person.personX + x_dist;
             var y_dist = r * y_unit;
@@ -158,7 +168,7 @@ function getAPath(person, goal){
             nodes[r][c][1] = [x_pos, y_pos];
 
             nodes[r][c][0] = true;
-            for (b = 0; b < blocks.length; block++){
+            for (var b = 0; b < blocks.length; b++){
                 if (x_pos > blocks[0] && x_pos < blocks[1]
                     && y_pos > blocks[2] && y_pos < blocks[3]){
                         nodes[r][c][0] = false;
@@ -174,8 +184,8 @@ function getAPath(person, goal){
         }
     }
 
-    var x_len = abs(x_unit);
-    var y_len = abs(y_unit);
+    var x_len = Math.abs(x_unit);
+    var y_len = Math.abs(y_unit);
     var d_len = distance([0,0], [x_unit, y_unit]);
 
     nodes[0][0][2] = 0;
@@ -183,11 +193,11 @@ function getAPath(person, goal){
 
     var extend_node = [0, 0];
     var extend_parent = [0, 0];
-
+    
     while(extend_node != [59, 59]){
         var least_f = Number.MAX_VALUE;
-        for(r = 0; r < 60; r++){
-            for(c = 0; c < 60; c++){
+        for(var r = 0; r < 60; r++){
+            for(var c = 0; c < 60; c++){
                 if(nodes[r][c][5]){
                     var f = nodes[r][c][2] + nodes[r][c][3];
                     if(f < least_f){
@@ -201,10 +211,10 @@ function getAPath(person, goal){
         nodes[extend_node[0]][extend_node[1]][5] = false;
         
         if(extend_node != [59, 59]){
-            for(r_var = -1; r_var <= 1; r_var++){
-                for(c_var = -1; c_var <= 1; c_var++){
-                    var r_dex = min(max(0, extend_node[0] + r_var), 59);
-                    var c_dex = min(max(0, extend_node[1] + c_var), 59);
+            for(var r_var = -1; r_var <= 1; r_var++){
+                for(var c_var = -1; c_var <= 1; c_var++){
+                    var r_dex = Math.min(Math.max(0, extend_node[0] + r_var), 59);
+                    var c_dex = Math.min(Math.max(0, extend_node[1] + c_var), 59);
                     if((r_dex != extend_node[0] || c_dex != extend_node[1]) && nodes[r_dex][c_dex][0]){
                         var next_node = nodes[r_dex][c_dex];
                         if (r_dex == r){
@@ -216,7 +226,7 @@ function getAPath(person, goal){
                         else{
                             var add_dist = d_len;
                         }
-                        var new_dist_to = checking_open[2] + add_dist;
+                        var new_dist_to = add_dist //checking_open[2] + add_dist;
                         if(new_dist_to < next_node[2]){
                             next_node[2] = new_dist_to;
                             next_node[4] = [r, c];

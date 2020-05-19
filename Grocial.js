@@ -45,6 +45,12 @@ canvas.addEventListener('mouseup', function (event) {
     //generateMapBlock(); //update paragraph when user finishes line 
 }, false);
 
+//disable right click menu in the canvas elements
+canvas.addEventListener("contextmenu", function (event) {
+    event.preventDefault();
+    return false;
+}, false);
+
 function toggleScreen() {
     var elem = document.documentElement;
     if (document.fullscreenElement === null) {
@@ -182,12 +188,16 @@ function drawPerson() {
     }
 }
 
+function debuggy(myHTML) {
+    var debugP = document.getElementById("debug");
+    debugP.innerHTML = myHTML;
+}
+
 //from existing map, generates static array we can copy into program
 function toggleMapBlock() {
     "use strict";
     var i, j = 0,
         pText = "[[",
-        debugP = document.getElementById("debug"),
         tempText = "";
     for (i = 0; i < groceryMap.tilesWide; i++) {
         for (j = 0; j < groceryMap.tilesHigh; j++) {
@@ -205,9 +215,9 @@ function toggleMapBlock() {
         }
     }
     if (groceryMap.showGrid) {
-        debugP.innerHTML = pText;
+        debuggy(pText);
     } else {
-        debugP.innerHTML = "no map";
+        debuggy("no map");
     }
     groceryMap.showGrid = !groceryMap.showGrid;
 }
@@ -229,4 +239,5 @@ window.requestAnimationFrame(gameLoop);
 //functions here run once at the start
 populateMap();
 createPeople();
+//testAStar();
 //drawGrid();
