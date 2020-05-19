@@ -35,28 +35,65 @@ function handlePerson(maxX, maxY, myPerson) {
     myPerson.personY = Math.min(maxY - 1, myPerson.personY);
 }
 
-/* init is the (x,y) of the initial position
-   end is the (x,y) of the end position
-   initdir is the initial direction (in radians)
-   enddir is the end direction(in radians)
-*/
-function curveDist(person, initdir, end, enddir){
-    var init = [person.personX, person.personY];
-    var radius = person.personTurnRad;
+/* Returns the length of the least curved path (curve, then straight) from 
+   initial to end point given a starting orientation on the initial point and 
+   a turn radius for the initial curve. Acts only as the heuristic, and hence, 
+   only returns a numeric result. 
 
-    var init_right_ang = initdir - 90;
-    var init_right_O = [init[0] + radius * Math.cos(init_right_ang), init[1] + radius * Math.sin(init_right_ang)];
-    
-    var h = distance(init_right_O, end);
-    if(h < radius){
-        return false
+   init is the (x,y) of the initial position
+   initdir is the initial direction (in radians) of the traveller
+   turn_rad is the turn radius to consider in this algorithm
+   end is the (x,y) of the end position
+*/
+function heuristicCurve(init, initdir, end, turn_rad){
+    var paths = new Array(2);
+    for(i = 0; i < 2; i++){
+        if(i == 0){
+            var init_ang = (initdir - (Math.PI / 2)) % (2 * Math.PI);
+        }
+        else{
+            var init_ang = (initdir + (Math.PI / 2)) % (2 * Math.PI);
+        }
+
+        var O = [init[0] + turn_rad * Math.cos(init_ang), init[1] - turn_rad * Math.sin(init_ang)];
+        var h = distance(O, end);
+        if(h < turn_rad){
+            return false;
+        }
+        
+        var straight = Math.sqrt(h ** 2 - r ** 2);
+        var theta = Math.acos(turn_rad / h);
+        var phi = Math.atan2(end[0] - O[0], O[1] - end[1]);
+        if(i == 0){
+            var turn_ang = (phi + theta) % (2 * Math.PI);
+        }
+        else{
+            var turn_ang = (phi - theta) % (2 * Math.PI);
+        }
+        var curve = ((2 * Math.PI - turn_ang) / 2 * Math.PI) * Math.PI * turn_rad * 2;
+        var length = straight + curve;
+        paths[i] = length;
     }
-    
-    
+    return min(paths[0], paths[1])
 }
 
 function distance(node, goal){
     return ((node[0] - goal[0]) ** 2 + (node[1] - goal[1]) ** 2) ** 0.5;
+}
+
+/* Returns the least curved path (curve, then straight, then curve) between two points 
+   given a starting and ending direction for each (respectively). Paths are returned 
+   as an array as follows:
+    [0] is the path length.
+    [1] is "L" or "R", indicating if the first curve should start by turning left or right.
+    [2] is the point at which the first curve should end, and the traveller should begin moving
+    straight. 
+    [3] is "L" or "R", indicating if the last curve should start by turning left or right. 
+    [4] is the point at which the last curve should start. The traveller stops moving straight
+    and starts making the last turn. 
+*/
+function nodePath(init, init_dir, end, end_dir, turn_rad){
+    //Write this. 
 }
 
 function getBlocked(person){
@@ -89,7 +126,7 @@ function getAPath(person, goal){
     }
     for(r = 0; r < 60; r++){
         for(c = 0; c < 60; c++){
-            nodes[r][c] = new Array(7);
+            nodes[r][c] = new Array(6);
         }
     }
 
@@ -106,13 +143,11 @@ function getAPath(person, goal){
                 on the path.)
             - In 5, hold a boolean declaring if this node is in the open (searched)
                 list. 
-            - In 6, hold a boolean declaring if this node has yet been visited (at all)
-                by the algorithm. 
         Also declare diagonal (the diagonal distance between neighboring nodes) here. 
         It's just convenient to do it in this part of the function.
     */
-    var x_unit = (goal[0] - person.personX) / 60.0;
-    var y_unit = (goal[1] - person.personY) / 60.0;
+    var x_unit = (goal[0] - person.personX) / 59.0;
+    var y_unit = (goal[1] - person.personY) / 59.0;
     var blocks = getBlocked(player);
     for(r = 0; r < 60; r++){
         for(c = 0; c < 60; c++){
@@ -131,18 +166,74 @@ function getAPath(person, goal){
             }
 
             if(nodes[r][c][0]){
-                nodes[r][c][2] = 0;
+                nodes[r][c][2] = Number.MAX_VALUE;
                 nodes[r][c][3] = distance([x_pos, y_pos], [person.personX, person.personY]);
                 nodes[r][c][4] = [0, 0];
                 nodes[r][c][5] = false;
-                nodes[r][c][6] = false;
             }
         }
     }
 
-    x_len = abs(x_unit);
-    y_len = abs(y_unit);
+    var x_len = abs(x_unit);
+    var y_len = abs(y_unit);
     var d_len = distance([0,0], [x_unit, y_unit]);
 
-    nodes[0][0][5] = true
+    nodes[0][0][2] = 0;
+    nodes[0][0][5] = true;
+
+    var extend_node = [0, 0];
+    var extend_parent = [0, 0];
+
+    while(extend_node != [59, 59]){
+        var least_f = Number.MAX_VALUE;
+        for(r = 0; r < 60; r++){
+            for(c = 0; c < 60; c++){
+                if(nodes[r][c][5]){
+                    var f = nodes[r][c][2] + nodes[r][c][3];
+                    if(f < least_f){
+                        least_f = f;
+                        extend_node = [r, c]
+                    }
+                }
+            }
+        }
+
+        nodes[extend_node[0]][extend_node[1]][5] = false;
+        
+        if(extend_node != [59, 59]){
+            for(r_var = -1; r_var <= 1; r_var++){
+                for(c_var = -1; c_var <= 1; c_var++){
+                    var r_dex = min(max(0, extend_node[0] + r_var), 59);
+                    var c_dex = min(max(0, extend_node[1] + c_var), 59);
+                    if((r_dex != extend_node[0] || c_dex != extend_node[1]) && nodes[r_dex][c_dex][0]){
+                        var next_node = nodes[r_dex][c_dex];
+                        if (r_dex == r){
+                            var add_dist = y_len;
+                        }
+                        else if (c_dex == c){
+                            var add_dist = x_len;
+                        }
+                        else{
+                            var add_dist = d_len;
+                        }
+                        var new_dist_to = checking_open[2] + add_dist;
+                        if(new_dist_to < next_node[2]){
+                            next_node[2] = new_dist_to;
+                            next_node[4] = [r, c];
+                            next_node[5] = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    var traceback = [59, 59];
+    var waypoints = [];
+    while(traceback != [0, 0]){
+        waypoints.unshift(nodes[traceback[0]][traceback[1]][1]);
+        traceback = nodes[traceback[0]][traceback[1]][4];
+    }
+    waypoints.unshift(nodes[0][0][1]);
+    return waypoints;
 }
