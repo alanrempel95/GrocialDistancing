@@ -126,26 +126,10 @@ function getBlocked(person){
     return blocks;
 }
 
-// Test makeAGrid
-function test_makeAGrid(){
-    if (JSON.stringify(makeAGrid(1, 1)) == JSON.stringify([[Array(6)]]) &&
-       (JSON.stringify(makeAGrid(3, 3)) == JSON.stringify([[Array(6), Array(6), Array(6)],
-                                                           [Array(6), Array(6), Array(6)],
-                                                           [Array(6), Array(6), Array(6)]])) &&
-       (JSON.stringify(makeAGrid(3, 2)) == JSON.stringify([[Array(6), Array(6), Array(6)],
-                                                           [Array(6), Array(6), Array(6)]])) &&
-       (JSON.stringify(makeAGrid(2, 3)) == JSON.stringify([[Array(6), Array(6)],
-                                                           [Array(6), Array(6)],
-                                                           [Array(6), Array(6)]]))){
-        console.log("pass");
-    }
-    else{
-        console.log("fail");
-    }
-}
-
 // Create the initial A* grid from the current map. Give each cell a 6-index array to hold 
-// stats during the A* process. 
+// stats during the A* process. (This function creates a diagonal mirror of the floor, but this
+// system is more intuitive then a pure floor array (the former works in [x,y] indices, while 
+// the latter works in [y,x])). 
 function makeAGrid(wide, high){
     var nodes = new Array(wide);
     for(var i = 0; i < wide; i++){
@@ -282,6 +266,7 @@ function tracebackPath(grid, start, goal){
         }
         waypoints.unshift(grid[traceback[0]][traceback[1]][1]);
         traceback = grid[traceback[0]][traceback[1]][4];
+        debugger;
     }
     waypoints.unshift(grid[start[0]][start[1]][1]);
     //debugger;
