@@ -5,6 +5,8 @@ function Person(Radius, X, Y, turn) {
     this.personX = X;
     this.personY = Y;
     this.personTurnRad = turn;
+    this.direction = 0;
+    this.velocity = 0;
 }
 
 function createPeople() {
@@ -57,11 +59,12 @@ function testAStar() {
 function heuristicCurve(init, initdir, end, turn_rad){
     var paths = new Array(2);
     for(var i = 0; i < 2; i++){
+        var init_ang = 0;
         if(i == 0){
-            var init_ang = (initdir - (Math.PI / 2)) % (2 * Math.PI);
+            init_ang = (initdir - (Math.PI / 2)) % (2 * Math.PI);
         }
         else{
-            var init_ang = (initdir + (Math.PI / 2)) % (2 * Math.PI);
+            init_ang = (initdir + (Math.PI / 2)) % (2 * Math.PI);
         }
 
         var O = [init[0] + turn_rad * Math.cos(init_ang), init[1] - turn_rad * Math.sin(init_ang)];
@@ -70,24 +73,25 @@ function heuristicCurve(init, initdir, end, turn_rad){
             return false;
         }
         
-        var straight = Math.sqrt(h ** 2 - r ** 2);
+        var straight = Math.sqrt(Math.pow(h, 2) - Math.pow(turn_rad, 2));
         var theta = Math.acos(turn_rad / h);
         var phi = Math.atan2(end[0] - O[0], O[1] - end[1]);
+        var turn_ang = 0;
         if(i == 0){
-            var turn_ang = (phi + theta) % (2 * Math.PI);
+            turn_ang = (phi + theta) % (2 * Math.PI);
         }
         else{
-            var turn_ang = (phi - theta) % (2 * Math.PI);
+            turn_ang = (phi - theta) % (2 * Math.PI);
         }
         var curve = ((2 * Math.PI - turn_ang) / 2 * Math.PI) * Math.PI * turn_rad * 2;
         var length = straight + curve;
         paths[i] = length;
     }
-    return min(paths[0], paths[1])
+    return Math.min(paths[0], paths[1])
 }
 
 function distance(node, goal){
-    return ((node[0] - goal[0]) ** 2 + (node[1] - goal[1]) ** 2) ** 0.5;
+    return Math.pow((Math.pow((node[0] - goal[0]), 2) + Math.pow((node[1] - goal[1]), 2)), 0.5);
 }
 
 /* Returns the least curved path (curve, then straight, then curve) between two points 
@@ -105,6 +109,7 @@ function nodePath(init, init_dir, end, end_dir, turn_rad){
     //Write this. 
 }
 
+// Would translate blocked nodes on the old 60 x 60 structure. Currently unused. 
 function getBlocked(person){
     var blocks = [];
     for(var r = 0; r < groceryMap.tilesWide; r++){
@@ -121,26 +126,41 @@ function getBlocked(person){
     return blocks;
 }
 
-/* This should return a list of x, y waypoints on the optimal path, but this
-will change based on the Gama Sutra method. 
-*/
-function getAPath(person, goal){
-    "use strict";
-
-    // Create the 60 by 60 grid. Then, for each node, create an array that 
-    // holds node stats. 
-    var nodes = new Array(60);
-    for(var i = 0; i < 60; i++){
-        nodes[i] = new Array(60);
+// Test makeAGrid
+function test_makeAGrid(){
+    if (JSON.stringify(makeAGrid(1, 1)) == JSON.stringify([[Array(6)]]) &&
+       (JSON.stringify(makeAGrid(3, 3)) == JSON.stringify([[Array(6), Array(6), Array(6)],
+                                                           [Array(6), Array(6), Array(6)],
+                                                           [Array(6), Array(6), Array(6)]])) &&
+       (JSON.stringify(makeAGrid(3, 2)) == JSON.stringify([[Array(6), Array(6), Array(6)],
+                                                           [Array(6), Array(6), Array(6)]])) &&
+       (JSON.stringify(makeAGrid(2, 3)) == JSON.stringify([[Array(6), Array(6)],
+                                                           [Array(6), Array(6)],
+                                                           [Array(6), Array(6)]]))){
+        console.log("pass");
     }
-    for(var r = 0; r < 60; r++){
-        for(var c = 0; c < 60; c++){
+    else{
+        console.log("fail");
+    }
+}
+
+// Create the initial A* grid from the current map. Give each cell a 6-index array to hold 
+// stats during the A* process. 
+function makeAGrid(wide, high){
+    var nodes = new Array(high);
+    for(var i = 0; i < high; i++){
+        nodes[i] = new Array(wide);
+    }
+    for(var r = 0; r < high; r++){
+        for(var c = 0; c < wide; c++){
             nodes[r][c] = new Array(6);
         }
     }
-    debuggy("here i am");
-    debugger;
-    /* Establish the stats as follows:
+    return nodes;
+}
+
+// Populate the initial A* grid from the current map, with respect to a given goal tile.
+/* Establish the stats as follows:
             - In 0, hold a boolean declaring if this node is reachable (not within 
                 or too close to an obstacle). After 1 (below) is calculated, 
                 this stat also determines if any of the others will be calculated or 
@@ -156,94 +176,135 @@ function getAPath(person, goal){
         Also declare diagonal (the diagonal distance between neighboring nodes) here. 
         It's just convenient to do it in this part of the function.
     */
-    var x_unit = (goal[0] - person.personX) / 59.0;
-    var y_unit = (goal[1] - person.personY) / 59.0;
-    var blocks = getBlocked(person);
-    for(var r = 0; r < 60; r++){
-        for(var c = 0; c < 60; c++){
-            var x_dist = c * x_unit;
-            var x_pos = person.personX + x_dist;
-            var y_dist = r * y_unit;
-            var y_pos = person.personY + y_dist;
-            nodes[r][c][1] = [x_pos, y_pos];
-
-            nodes[r][c][0] = true;
-            for (var b = 0; b < blocks.length; b++){
-                if (x_pos > blocks[0] && x_pos < blocks[1]
-                    && y_pos > blocks[2] && y_pos < blocks[3]){
-                        nodes[r][c][0] = false;
-                }
+function prepAGrid(grid, goal_tile, floor_plan){
+    var goal_x = (goal_tile[0] + 0.5) * groceryMap.tileSize;
+    var goal_y = (goal_tile[0] + 0.5) * groceryMap.tileSize;
+    var goal = [goal_x, goal_y]
+    
+    for (var r = 0; r < grid.length; r++) {
+        for (var c = 0; c < grid[0].length; c++) {
+            switch (floor_plan[r][c]) {
+                case 0:
+                    grid[r][c][0] = true;
+                    break;
+                default:
+                    grid[r][c][0] = false;
             }
-
-            if(nodes[r][c][0]){
-                nodes[r][c][2] = Number.MAX_VALUE;
-                nodes[r][c][3] = distance([x_pos, y_pos], [person.personX, person.personY]);
-                nodes[r][c][4] = [0, 0];
-                nodes[r][c][5] = false;
-            }
+            
+            var cell_x = (c + 0.5) * groceryMap.tileSize;
+            var cell_y = (r + 0.5) * groceryMap.tileSize;
+            grid[r][c][1] = [cell_x, cell_y]
+            
+            grid[r][c][2] = Number.MAX_VALUE;
+            grid[r][c][3] = distance(grid[r][c][1], goal);
+            grid[r][c][4] = [0, 0];
+            grid[r][c][5] = false;
         }
     }
+}
 
-    var x_len = Math.abs(x_unit);
-    var y_len = Math.abs(y_unit);
-    var d_len = distance([0,0], [x_unit, y_unit]);
-
-    nodes[0][0][2] = 0;
-    nodes[0][0][5] = true;
-
-    var extend_node = [0, 0];
-    var extend_parent = [0, 0];
-    
-    while(extend_node != [59, 59]){
-        var least_f = Number.MAX_VALUE;
-        for(var r = 0; r < 60; r++){
-            for(var c = 0; c < 60; c++){
-                if(nodes[r][c][5]){
-                    var f = nodes[r][c][2] + nodes[r][c][3];
-                    if(f < least_f){
-                        least_f = f;
-                        extend_node = [r, c]
-                    }
-                }
-            }
-        }
-
-        nodes[extend_node[0]][extend_node[1]][5] = false;
-        
-        if(extend_node != [59, 59]){
-            for(var r_var = -1; r_var <= 1; r_var++){
-                for(var c_var = -1; c_var <= 1; c_var++){
-                    var r_dex = Math.min(Math.max(0, extend_node[0] + r_var), 59);
-                    var c_dex = Math.min(Math.max(0, extend_node[1] + c_var), 59);
-                    if((r_dex != extend_node[0] || c_dex != extend_node[1]) && nodes[r_dex][c_dex][0]){
-                        var next_node = nodes[r_dex][c_dex];
-                        if (r_dex == r){
-                            var add_dist = y_len;
-                        }
-                        else if (c_dex == c){
-                            var add_dist = x_len;
-                        }
-                        else{
-                            var add_dist = d_len;
-                        }
-                        var new_dist_to = add_dist //checking_open[2] + add_dist;
-                        if(new_dist_to < next_node[2]){
-                            next_node[2] = new_dist_to;
-                            next_node[4] = [r, c];
-                            next_node[5] = true;
-                        }
-                    }
+// Given an A* grid, find the node in the open set with the least f value. (This is the node to
+// extend next per the algorithm!)
+function find_extend(grid){
+    var least_f = Number.MAX_VALUE;
+    var extend = [0, 0];
+    for(var r = 0; r < grid.length; r++){
+        for(var c = 0; c < grid[0].length; c++){
+            if(grid[r][c][5]){
+                var f = grid[r][c][2] + grid[r][c][3];
+                if(f < least_f){
+                    least_f = f;
+                    extend = [r, c];
                 }
             }
         }
     }
+    return extend;
+}
+
+// Mutate the grid to "extend" from the given node. This removes the node from the open set and adds 
+// neighbors as needed. 
+function extend(grid, extend_node){
+    var parent = grid[extend_node[0]][extend_node[1]];
+    parent[5] = false;
+    for(var r_var = -1; r_var <= 1; r_var++){
+        for(var c_var = -1; c_var <= 1; c_var++){
+            var r_dex = Math.min(Math.max(0, extend_node[0] + r_var), grid.length - 1);
+            var c_dex = Math.min(Math.max(0, extend_node[1] + c_var), grid[0].length - 1);
+            if((r_dex == extend_node[0] ? c_dex != extend_node[1] : c_dex == extend_node[1]) && grid[r_dex][c_dex][0]){
+                var next_node = grid[r_dex][c_dex];
+                var new_dist_to = parent[2] + groceryMap.tileSize;
+                if (new_dist_to < next_node[2]) {
+                    next_node[2] = new_dist_to;
+                    next_node[4] = [extend_node[0], extend_node[1]];
+                    next_node[5] = true;
+                }
+            }
+        }
+    }
+}
+
+// Perform the A* procedure on the grid. This mutates it until the final resulting grid from A*
+// is achieved. 
+function performAStar(grid, start_tile, goal_tile){
+    var start = grid[start_tile[0]][start_tile[1]]
+    start[2] = 0;
+    start[5] = true;
     
-    var traceback = [59, 59];
+    var extend_node = [start_tile[0], start_tile[1]];
+    var while_stopper = 0;
+    
+    while(extend_node != goal_tile){
+        while_stopper++;
+        if(while_stopper > 20000){
+            break;
+        }
+        extend_node = find_extend(grid);
+        extend(grid, extend_node);
+    }
+}
+
+/* Traceback the path that ends at the goal tile via the grid (which should have)
+completed the A* algorithm mutation. */
+function tracebackPath(grid, goal){
+    var traceback = [goal[0], goal[1]];
     var waypoints = [];
+    var while_stopper = 0
     while(traceback != [0, 0]){
-        waypoints.unshift(nodes[traceback[0]][traceback[1]][1]);
-        traceback = nodes[traceback[0]][traceback[1]][4];
+        while_stopper++;
+        if(while_stopper > 20000){
+            break;
+        }
+        waypoints.unshift(grid[traceback[0]][traceback[1]][1]);
+        traceback = grid[traceback[0]][traceback[1]][4];
     }
-    waypoints.unshift(nodes[0][0][1]);
+    waypoints.unshift(grid[0][0][1]);
     return waypoints;
+}
+
+/* This should return a list of x, y waypoints on the optimal path, but this
+will change based on the Gama Sutra method. Person is the starting tile, goal is 
+the ending tile. 
+*/
+function getAPath(person, goal){
+    "use strict";    
+    var nodes = makeAGrid(groceryMap.tilesWide, groceryMap.tilesHigh);
+//    debuggy("here i am");
+//    debugger;
+    prepAGrid(nodes, goal, groceryMap.floorPlan);
+    
+    performAStar(nodes, person, goal);
+    
+    return tracebackPath(nodes, goal);
+}
+
+// Turn the (x, y) waypoints into (x, y, d) waypoints. This smoothed path should 
+// have at most as many points as the initial. 
+function smooth48(path){
+    
+}
+
+// Perform a D-8 A* search between two points. Returns (x, y, d) waypoints. 
+function getD8APath(person, goal){
+    
 }

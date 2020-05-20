@@ -241,3 +241,4 @@ populateMap();
 createPeople();
 //testAStar();
 //drawGrid();
+test_makeAGrid();
