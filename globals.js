@@ -1,15 +1,18 @@
 //global object
 var groceryMap = {
     tileSize: 30,
-    tilesHigh: 30,
-    tilesWide: 20,
+    tilesWide: 19,
+    tilesHigh: 20,
     mouseX: 0,
     mouseY: 0,
     isDragging: false,
     mouseButton: -1,
     numberOfPeople: 10,
     mode: "user",
-    showGrid: true
+    showGrid: true,
+    maxShoppers: 0,
+    targetSeparation: 1,
+    otherThing: ""
 };
 
 var map1 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

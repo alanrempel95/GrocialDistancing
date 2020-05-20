@@ -12,7 +12,6 @@
             <button class="top" onclick="populateMap();">Clear Map</button>
             <button class="top" onclick="showMap(1);">Map 1</button>
             <button class="top" onclick="toggleScreen();">Toggle Full Screen</button>
-            <button class="top" onclick="testAStar();">Crash the mf site</button>
         </div>
         <div id="wrap">
             <canvas id="background" style="z-index: 1">
@@ -30,7 +29,7 @@
                 <input type="number" id="distance" value=2><br>
                 <label for="placeholder">Something Else</label>
                 <input type="text" id="placeholder" value="yo fam"><br>
-                <button class="inForm">Start Simulation</button>
+                <button class="inForm" onclick="startSimulation();">Start Simulation</button>
             </form>
             <p id="debug">hello world</p>
         </div>
