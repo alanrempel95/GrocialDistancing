@@ -7,7 +7,7 @@ var groceryMap = {
     mouseY: 0,
     isDragging: false,
     mouseButton: -1,
-    numberOfPeople: 10,
+    numberOfPeople: 1,
     mode: "user",
     showGrid: true,
     maxShoppers: 0,
