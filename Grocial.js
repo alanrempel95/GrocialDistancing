@@ -9,12 +9,12 @@ var bkgrnd = document.getElementById("background");
 var bgctx = bkgrnd.getContext("2d");
 
 //set margin to -half_width and left:50% to vertically center
-canvas.width = groceryMap.tilesHigh * groceryMap.tileSize;
-canvas.height = groceryMap.tilesWide * groceryMap.tileSize;
+canvas.width = groceryMap.tilesWide * groceryMap.tileSize;
+canvas.height = groceryMap.tilesHigh * groceryMap.tileSize;
 canvas.style.marginLeft = "-" + canvas.width / 2 + "px";
 
-bkgrnd.width = groceryMap.tilesHigh * groceryMap.tileSize;
-bkgrnd.height = groceryMap.tilesWide * groceryMap.tileSize;
+bkgrnd.width = groceryMap.tilesWide * groceryMap.tileSize;
+bkgrnd.height = groceryMap.tilesHigh * groceryMap.tileSize;
 bkgrnd.style.marginLeft = "-" + bkgrnd.width / 2 + "px";
 
 ctx.imageSmoothingEnabled = false;
@@ -90,26 +90,26 @@ function populateMap() {
     "use strict";
     var k, l, i, j = 0;
     //array of tile classifications
-    groceryMap.floorPlan = new Array(groceryMap.tilesHigh);
+    groceryMap.floorPlan = new Array(groceryMap.tilesWide);
     for (k = 0; k < groceryMap.floorPlan.length; k++) {
-        groceryMap.floorPlan[k] = new Array(groceryMap.tilesWide);
+        groceryMap.floorPlan[k] = new Array(groceryMap.tilesHigh);
     }
     
     //array of floor colors so nobody has a seizure
-    groceryMap.floorColor = new Array(groceryMap.tilesHigh);
+    groceryMap.floorColor = new Array(groceryMap.tilesWide);
     for (l = 0; l < groceryMap.floorColor.length; l++) {
-        groceryMap.floorColor[l] = new Array(groceryMap.tilesWide);
+        groceryMap.floorColor[l] = new Array(groceryMap.tilesHigh);
     }
     
-    for (i = 0; i < groceryMap.tilesHigh; i++) {
-        for (j = 0; j < groceryMap.tilesWide; j++) {
+    for (i = 0; i < groceryMap.tilesWide; i++) {
+        for (j = 0; j < groceryMap.tilesHigh; j++) {
             //floor is different shades of light gray
-            groceryMap.floorColor[j][i] = 255 - Math.random() * 50;
+            groceryMap.floorColor[i][j] = 255 - Math.random() * 50;
             
             if (Math.random() < 1) { //set to less than one to make other color randomly            
-                groceryMap.floorPlan[j][i] = 0; //floor
+                groceryMap.floorPlan[i][j] = 0; //floor
             } else {
-                groceryMap.floorPlan[j][i] = 2; //idk not floor or wall
+                groceryMap.floorPlan[i][j] = 2; //idk not floor or wall
             }
         }
     }
@@ -121,15 +121,15 @@ function drawGrid() {
     var i, j = 0,
         bgColor = 128,
         tileType = "";
-    for (i = 0; i < groceryMap.tilesHigh; i++) {
-        for (j = 0; j < groceryMap.tilesWide; j++) {
+    for (i = 0; i < groceryMap.tilesWide; i++) {
+        for (j = 0; j < groceryMap.tilesHigh; j++) {
             bgctx.beginPath();
             bgctx.rect(i * groceryMap.tileSize, j * groceryMap.tileSize, groceryMap.tileSize, groceryMap.tileSize);
-            tileType = groceryMap.floorPlan[j][i];
+            tileType = groceryMap.floorPlan[i][j];
             
             switch (tileType) {
             case 0:
-                bgColor = groceryMap.floorColor[j][i];
+                bgColor = groceryMap.floorColor[i][j];
                 bgctx.fillStyle = "rgb(" + bgColor + ", " + bgColor + ", " + bgColor + ")";
                 break;
             case 1:
@@ -155,9 +155,9 @@ function userPopulateMap() {
         l = Math.floor(groceryMap.mouseY / groceryMap.tileSize);
         
         if (groceryMap.mouseButton === 0) {
-            groceryMap.floorPlan[l][k] = 1; //wall
+            groceryMap.floorPlan[k][l] = 1; //wall
         } else if (groceryMap.mouseButton === 2) {
-            groceryMap.floorPlan[l][k] = 2; //idk something else
+            groceryMap.floorPlan[k][l] = 2; //idk something else
         }
     }
 }
@@ -180,7 +180,7 @@ function drawPerson() {
     "use strict";
     var i = 0;
     for (i = 0; i < groceryMap.numberOfPeople; i++) {
-        handlePerson(groceryMap.tilesWide * groceryMap.tileSize, groceryMap.tilesHigh * groceryMap.tileSize, groceryMap.People[i]);
+        handlePerson(groceryMap.tilesHigh * groceryMap.tileSize, groceryMap.tilesWide * groceryMap.tileSize, groceryMap.People[i]);
         ctx.beginPath();
         ctx.arc(groceryMap.People[i].personX, groceryMap.People[i].personY, groceryMap.People[i].personRadius, 0, 2 * Math.PI, false);
         ctx.fillStyle = "purple";
@@ -199,12 +199,12 @@ function toggleMapBlock() {
     var i, j = 0,
         pText = "[[",
         tempText = "";
-    for (i = 0; i < groceryMap.tilesWide; i++) {
-        for (j = 0; j < groceryMap.tilesHigh; j++) {
-            tempText = groceryMap.floorPlan[i][j];
+    for (i = 0; i < groceryMap.tilesHigh; i++) {
+        for (j = 0; j < groceryMap.tilesWide; j++) {
+            tempText = groceryMap.floorPlan[j][i];
             pText += tempText;
-            if (j === groceryMap.tilesHigh - 1) {
-                if (i === groceryMap.tilesWide - 1) {
+            if (j === groceryMap.tilesWide - 1) {
+                if (i === groceryMap.tilesHigh - 1) {
                     pText += "]]"; //last thing
                 } else {
                     pText += "],<br />["; //end of row
@@ -233,6 +233,17 @@ function gameLoop() {
     drawGrid();
     drawPerson();
     window.requestAnimationFrame(gameLoop);
+}
+
+//function to apply parameters and begin simulation
+function startSimulation() {
+    var populationBox = document.getElementById("population");
+    var distanceBox = document.getElementById("distance");
+    var otherBox = document.getElementById("placeholder");
+    groceryMap.maxShoppers = parseInt(populationBox.value);
+    groceryMap.targetSeparation = parseFloat(distanceBox.value);
+    groceryMap.otherThing = otherBox.value;
+    testAStar();
 }
 
 window.requestAnimationFrame(gameLoop);
