@@ -71,18 +71,23 @@ function changeMode(myMode) {
 
 function showMap(mySelection) {
     "use strict";
+    var myMap;
     switch (mySelection) {
-    case 1:
-        groceryMap.floorPlan = map1.map(function (arr) {
-            return arr.slice();
-        });
-        changeMode(2);
-        break;
-    default:
-        groceryMap.floorPlan = map1.map(function (arr) {
-            return arr.slice();
-        });
+        case 1:
+            myMap = map1;
+            break;
+        case 2:
+            myMap = map2;
+            break;
+        default:
+            groceryMap.floorPlan = map1.map(function (arr) {
+                return arr.slice();
+            });
     }
+    groceryMap.floorPlan = myMap.map(function (arr) {
+        return arr.slice();
+    });
+    changeMode(2);
 }
 
 //initialize background/floor
@@ -221,12 +226,12 @@ function toggleMapBlock() {
     var i, j = 0,
         pText = "[[",
         tempText = "";
-    for (i = 0; i < groceryMap.tilesHigh; i++) {
-        for (j = 0; j < groceryMap.tilesWide; j++) {
-            tempText = groceryMap.floorPlan[j][i];
+    for (i = 0; i < groceryMap.tilesWide; i++) {
+        for (j = 0; j < groceryMap.tilesHigh; j++) {
+            tempText = groceryMap.floorPlan[i][j];
             pText += tempText;
-            if (j === groceryMap.tilesWide - 1) {
-                if (i === groceryMap.tilesHigh - 1) {
+            if (j === groceryMap.tilesHigh - 1) {
+                if (i === groceryMap.tilesWide - 1) {
                     pText += "]]"; //last thing
                 } else {
                     pText += "],<br />["; //end of row
@@ -265,12 +270,13 @@ function startSimulation() {
     groceryMap.maxShoppers = parseInt(populationBox.value);
     groceryMap.targetSeparation = parseFloat(distanceBox.value);
     groceryMap.otherThing = otherBox.value;
-    testAStar();
+    //testAStar();
 }
 
 window.requestAnimationFrame(gameLoop);
 //functions here run once at the start
 populateMap();
+showMap(2);
 createPeople();
 //testAStar();
 //drawGrid();
