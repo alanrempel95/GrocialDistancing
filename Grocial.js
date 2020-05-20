@@ -176,6 +176,28 @@ function showCursor() {
     ctx.fill();
 }
 
+//function to return X, Y of person on A* path
+function handlePerson(maxX, maxY, myPerson) {
+    "use strict";
+    //if there's more path to travel, otherwise just stop
+    if (myPerson.currentPoint < myPerson.currentPath.length - 1) {
+        var x_coord = (myPerson.currentPath[myPerson.currentPoint][0] - 0.5) * groceryMap.tileSize;
+        var y_coord = (myPerson.currentPath[myPerson.currentPoint][1] - 0.5) * groceryMap.tileSize;
+        var x_goal = (myPerson.currentPath[myPerson.currentPoint + 1][0] - 0.5) * groceryMap.tileSize;
+        var y_goal = (myPerson.currentPath[myPerson.currentPoint + 1][1] - 0.5) * groceryMap.tileSize;
+        var angle = Math.atan2((y_coord - y_goal), (x_coord - x_goal));
+        var x_speed = myPerson.velocity * Math.cos(angle);
+        var y_speed = myPerson.velocity * Math.sin(angle);
+        myPerson.personX -= x_speed;
+        myPerson.personY -= y_speed;
+
+        //if close enough to next node, change goal to next node
+        if (Math.abs(myPerson.personY - y_goal) < 5 && Math.abs(myPerson.personX - x_goal) < 5) {
+            myPerson.currentPoint++;
+        }
+    }
+}
+
 function drawPerson() {
     "use strict";
     var i = 0;

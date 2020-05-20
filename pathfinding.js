@@ -6,44 +6,44 @@ function Person(Radius, X, Y, turn) {
     this.personY = Y;
     this.personTurnRad = turn;
     this.direction = 0;
-    this.velocity = 0;
+    this.velocity = 1; //px per frame?
 }
 
 function createPeople() {
     "use strict";
-    var i = 0;
+    var i = 0,
+        myGoal = [0, 0],
+        myStart = [0, 0],
+        x_coord = 0,
+        y_coord = 0,
+        myPath;
     groceryMap.People = new Array(groceryMap.numberOfPeople);
     for (var i = 0; i < groceryMap.numberOfPeople; i++) {
-        groceryMap.People[i] = new Person(15 + 3 * Math.random(), 300 + 200 * Math.random(), 300 + 200 * Math.random());
+        groceryMap.People[i] = new Person(15 + 3 * Math.random(), 0, 0);
+        
+        myGoal = [10, 15];
+        myStart = [5, 5];
+        myPath = getAPath(myStart, myGoal);
+        
+        groceryMap.People[i].currentPath = myPath; //this is a reference, copy if needed
+        groceryMap.People[i].currentPoint = 0; //first element of path
+        x_coord = groceryMap.People[i].currentPath[0][0];
+        y_coord = groceryMap.People[i].currentPath[0][1];
+        groceryMap.People[i].personX = (x_coord - 0.5) * groceryMap.tileSize;
+        groceryMap.People[i].personY = (y_coord - 0.5) * groceryMap.tileSize;
     }
-}
-
-//@jordan - this one's all you. Mockup function only. Brownian motion lol.
-function handlePerson(maxX, maxY, myPerson) {
-    "use strict";
-    var velX, velY = 0;
-
-    velX = 5 - 10 * Math.random();
-    velY = 5 - 10 * Math.random();
-    if (myPerson.personX > 0 && myPerson.personX < maxX) {
-        myPerson.personX = myPerson.personX + velX;
-    }
-    if (myPerson.personY > 0 && myPerson.personY < maxY) {
-        myPerson.personY = myPerson.personY + velY;
-    }
-    myPerson.personX = Math.max(1, myPerson.personX);
-    myPerson.personX = Math.min(maxX - 1, myPerson.personX);
-    myPerson.personY = Math.max(1, myPerson.personY);
-    myPerson.personY = Math.min(maxY - 1, myPerson.personY);
 }
 
 function testAStar() {
-    var myPerson = [5,5];
-    var myGoal = [18, 19];
-    var myPath = getAPath(myPerson, myGoal);
-    for (var i = 0; i < myPath.length; i++) {
-        console.log(myPath[i]);
-    }
+    var myPerson = groceryMap.People[0];
+    var myGoal = [10, 15];
+    var myStart = [5, 5];
+    var myPath = getAPath(myStart, myGoal);
+//    for (var i = 0; i < myPath.length; i++) {
+//        console.log(myPath[i]);
+//    }
+    myPerson.currentPath = myPath; //this is a reference, copy if needed
+    myPerson.currentPoint = 0; //first element of path
 }
 
 /* Returns the length of the least curved path (curve, then straight) from 
@@ -161,9 +161,12 @@ function makeAGrid(wide, high){
         It's just convenient to do it in this part of the function.
     */
 function prepAGrid(grid, goal_tile, floor_plan){
-    var goal_x = goal_tile[0]
-    var goal_y = goal_tile[1]
-    var goal = [goal_x, goal_y]
+    //var goal_x = (goal_tile[0] + 0.5) * groceryMap.tileSize;
+    //var goal_y = (goal_tile[0] + 0.5) * groceryMap.tileSize;
+    var goal_x = goal_tile[0];
+    var goal_y = goal_tile[1];
+    
+    var goal = [goal_x, goal_y];
     
     for (var r = 0; r < grid.length; r++) {
         for (var c = 0; c < grid[0].length; c++) {
@@ -174,9 +177,12 @@ function prepAGrid(grid, goal_tile, floor_plan){
                 default:
                     grid[r][c][0] = false;
             }
-            var cell_x = r;
-            var cell_y = c;
-            grid[r][c][1] = [cell_x, cell_y]
+            
+            //var cell_x = (c + 0.5) * groceryMap.tileSize;
+            //var cell_y = (r + 0.5) * groceryMap.tileSize;
+            var cell_x = c;
+            var cell_y = r;
+            grid[r][c][1] = [cell_x, cell_y];
             
             grid[r][c][2] = Number.MAX_VALUE;
             grid[r][c][3] = distance(grid[r][c][1], goal);
@@ -230,7 +236,7 @@ function extend(grid, extend_node){
 // Perform the A* procedure on the grid. This mutates it until the final resulting grid from A*
 // is achieved. 
 function performAStar(grid, start_tile, goal_tile){
-    var start = grid[start_tile[0]][start_tile[1]]
+    var start = grid[start_tile[0]][start_tile[1]];
     start[2] = 0;
     start[5] = true;
     
@@ -252,8 +258,8 @@ completed the A* algorithm mutation. */
 function tracebackPath(grid, start, goal){
     var traceback = [goal[0], goal[1]];
     var waypoints = [];
-    var while_stopper = 0
-    while(JSON.stringify(traceback) != JSON.stringify(start)){
+    var while_stopper = 0;
+    while(JSON.stringify(traceback) != JSON.stringify(start)) {
         while_stopper++;
         if(while_stopper > 20000){
             break;
@@ -263,6 +269,7 @@ function tracebackPath(grid, start, goal){
         debugger;
     }
     waypoints.unshift(grid[start[0]][start[1]][1]);
+    //debugger;
     return waypoints;
 }
 
