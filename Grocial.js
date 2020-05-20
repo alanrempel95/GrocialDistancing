@@ -186,10 +186,10 @@ function handlePerson(maxX, maxY, myPerson) {
     "use strict";
     //if there's more path to travel, otherwise just stop
     if (myPerson.currentPoint < myPerson.currentPath.length - 1) {
-        var x_coord = (myPerson.currentPath[myPerson.currentPoint][0] - 0.5) * groceryMap.tileSize;
-        var y_coord = (myPerson.currentPath[myPerson.currentPoint][1] - 0.5) * groceryMap.tileSize;
-        var x_goal = (myPerson.currentPath[myPerson.currentPoint + 1][0] - 0.5) * groceryMap.tileSize;
-        var y_goal = (myPerson.currentPath[myPerson.currentPoint + 1][1] - 0.5) * groceryMap.tileSize;
+        var x_coord = (myPerson.currentPath[myPerson.currentPoint][0] + 0.5) * groceryMap.tileSize;
+        var y_coord = (myPerson.currentPath[myPerson.currentPoint][1] + 0.5) * groceryMap.tileSize;
+        var x_goal = (myPerson.currentPath[myPerson.currentPoint + 1][0] + 0.5) * groceryMap.tileSize;
+        var y_goal = (myPerson.currentPath[myPerson.currentPoint + 1][1] + 0.5) * groceryMap.tileSize;
         var angle = Math.atan2((y_coord - y_goal), (x_coord - x_goal));
         var x_speed = myPerson.velocity * Math.cos(angle);
         var y_speed = myPerson.velocity * Math.sin(angle);

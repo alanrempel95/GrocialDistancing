@@ -22,15 +22,15 @@ function createPeople() {
         groceryMap.People[i] = new Person(15 + 3 * Math.random(), 0, 0);
         
         myGoal = [10, 15];
-        myStart = [5, 5];
+        myStart = [1, 1];
         myPath = getAPath(myStart, myGoal);
         
         groceryMap.People[i].currentPath = myPath; //this is a reference, copy if needed
         groceryMap.People[i].currentPoint = 0; //first element of path
         x_coord = groceryMap.People[i].currentPath[0][0];
         y_coord = groceryMap.People[i].currentPath[0][1];
-        groceryMap.People[i].personX = (x_coord - 0.5) * groceryMap.tileSize;
-        groceryMap.People[i].personY = (y_coord - 0.5) * groceryMap.tileSize;
+        groceryMap.People[i].personX = (x_coord + 0.5) * groceryMap.tileSize;
+        groceryMap.People[i].personY = (y_coord + 0.5) * groceryMap.tileSize;
     }
 }
 
