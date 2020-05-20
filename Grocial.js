@@ -253,3 +253,4 @@ createPeople();
 //testAStar();
 //drawGrid();
 test_makeAGrid();
+test_prepAGrid();

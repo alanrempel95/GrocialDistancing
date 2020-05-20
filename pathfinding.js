@@ -38,8 +38,8 @@ function handlePerson(maxX, maxY, myPerson) {
 }
 
 function testAStar() {
-    var myPerson = groceryMap.People[1];
-    var myGoal = [10, 25];
+    var myPerson = [5,5];
+    var myGoal = [18, 19];
     var myPath = getAPath(myPerson, myGoal);
     for (var i = 0; i < myPath.length; i++) {
         console.log(myPath[i]);
@@ -126,33 +126,17 @@ function getBlocked(person){
     return blocks;
 }
 
-// Test makeAGrid
-function test_makeAGrid(){
-    if (JSON.stringify(makeAGrid(1, 1)) == JSON.stringify([[Array(6)]]) &&
-       (JSON.stringify(makeAGrid(3, 3)) == JSON.stringify([[Array(6), Array(6), Array(6)],
-                                                           [Array(6), Array(6), Array(6)],
-                                                           [Array(6), Array(6), Array(6)]])) &&
-       (JSON.stringify(makeAGrid(3, 2)) == JSON.stringify([[Array(6), Array(6), Array(6)],
-                                                           [Array(6), Array(6), Array(6)]])) &&
-       (JSON.stringify(makeAGrid(2, 3)) == JSON.stringify([[Array(6), Array(6)],
-                                                           [Array(6), Array(6)],
-                                                           [Array(6), Array(6)]]))){
-        console.log("pass");
-    }
-    else{
-        console.log("fail");
-    }
-}
-
 // Create the initial A* grid from the current map. Give each cell a 6-index array to hold 
-// stats during the A* process. 
+// stats during the A* process. (This function creates a diagonal mirror of the floor, but this
+// system is more intuitive then a pure floor array (the former works in [x,y] indices, while 
+// the latter works in [y,x])). 
 function makeAGrid(wide, high){
-    var nodes = new Array(high);
-    for(var i = 0; i < high; i++){
-        nodes[i] = new Array(wide);
+    var nodes = new Array(wide);
+    for(var i = 0; i < wide; i++){
+        nodes[i] = new Array(high);
     }
-    for(var r = 0; r < high; r++){
-        for(var c = 0; c < wide; c++){
+    for(var r = 0; r < wide; r++){
+        for(var c = 0; c < high; c++){
             nodes[r][c] = new Array(6);
         }
     }
@@ -177,8 +161,8 @@ function makeAGrid(wide, high){
         It's just convenient to do it in this part of the function.
     */
 function prepAGrid(grid, goal_tile, floor_plan){
-    var goal_x = (goal_tile[0] + 0.5) * groceryMap.tileSize;
-    var goal_y = (goal_tile[0] + 0.5) * groceryMap.tileSize;
+    var goal_x = goal_tile[0]
+    var goal_y = goal_tile[1]
     var goal = [goal_x, goal_y]
     
     for (var r = 0; r < grid.length; r++) {
@@ -190,9 +174,8 @@ function prepAGrid(grid, goal_tile, floor_plan){
                 default:
                     grid[r][c][0] = false;
             }
-            
-            var cell_x = (c + 0.5) * groceryMap.tileSize;
-            var cell_y = (r + 0.5) * groceryMap.tileSize;
+            var cell_x = r;
+            var cell_y = c;
             grid[r][c][1] = [cell_x, cell_y]
             
             grid[r][c][2] = Number.MAX_VALUE;
@@ -266,19 +249,20 @@ function performAStar(grid, start_tile, goal_tile){
 
 /* Traceback the path that ends at the goal tile via the grid (which should have)
 completed the A* algorithm mutation. */
-function tracebackPath(grid, goal){
+function tracebackPath(grid, start, goal){
     var traceback = [goal[0], goal[1]];
     var waypoints = [];
     var while_stopper = 0
-    while(traceback != [0, 0]){
+    while(JSON.stringify(traceback) != JSON.stringify(start)){
         while_stopper++;
         if(while_stopper > 20000){
             break;
         }
         waypoints.unshift(grid[traceback[0]][traceback[1]][1]);
         traceback = grid[traceback[0]][traceback[1]][4];
+        debugger;
     }
-    waypoints.unshift(grid[0][0][1]);
+    waypoints.unshift(grid[start[0]][start[1]][1]);
     return waypoints;
 }
 
@@ -286,16 +270,16 @@ function tracebackPath(grid, goal){
 will change based on the Gama Sutra method. Person is the starting tile, goal is 
 the ending tile. 
 */
-function getAPath(person, goal){
+function getAPath(start, goal){
     "use strict";    
     var nodes = makeAGrid(groceryMap.tilesWide, groceryMap.tilesHigh);
 //    debuggy("here i am");
 //    debugger;
     prepAGrid(nodes, goal, groceryMap.floorPlan);
     
-    performAStar(nodes, person, goal);
+    performAStar(nodes, start, goal);
     
-    return tracebackPath(nodes, goal);
+    return tracebackPath(nodes, start, goal);
 }
 
 // Turn the (x, y) waypoints into (x, y, d) waypoints. This smoothed path should 
