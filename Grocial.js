@@ -277,8 +277,23 @@ window.requestAnimationFrame(gameLoop);
 //functions here run once at the start
 populateMap();
 showMap(2);
+
+function get_goals(){
+    groceryMap.goals = []
+    for (i = 0; i < groceryMap.tilesWide; i++) {
+        for (j = 0; j < groceryMap.tilesHigh; j++) {
+            if (groceryMap.floorPlan[i][j] == 2) {
+                groceryMap.goals.push([i, j]);
+            }
+        }
+    }
+    debugger;
+}
+
+get_goals()
+
 createPeople();
 //testAStar();
 //drawGrid();
-test_makeAGrid();
-test_prepAGrid();
+//test_makeAGrid();
+//test_prepAGrid();

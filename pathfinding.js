@@ -7,6 +7,7 @@ function Person(Radius, X, Y, turn) {
     this.personTurnRad = turn;
     this.direction = 0;
     this.velocity = 1; //px per frame?
+    this.grocery_list = [];
 }
 
 function createPeople() {
@@ -16,14 +17,26 @@ function createPeople() {
         myStart = [0, 0],
         x_coord = 0,
         y_coord = 0,
+        entrance = [12, 18],
         myPath;
     groceryMap.People = new Array(groceryMap.numberOfPeople);
     for (var i = 0; i < groceryMap.numberOfPeople; i++) {
         groceryMap.People[i] = new Person(15 + 3 * Math.random(), 0, 0);
         
-        myGoal = [10, 15];
+        myGoal = [10, 10];
         myStart = [1, 1];
         myPath = getAPath(myStart, myGoal);
+        
+        groceryMap.People[i].grocery_list.push(entrance);
+        for (var g = 0; g < groceryMap.goals.length; g++){
+            var goal = groceryMap.goals[g];
+            if (Math.random() < 0.5 && JSON.stringify(goal) != JSON.stringify(entrance)) {
+                groceryMap.People[i].grocery_list.push(goal);
+            }
+        }
+        groceryMap.People[i].grocery_list.push(entrance);
+        console.log(JSON.stringify(groceryMap.People[i].grocery_list))
+        debugger;
         
         groceryMap.People[i].currentPath = myPath; //this is a reference, copy if needed
         groceryMap.People[i].currentPoint = 0; //first element of path
@@ -171,17 +184,17 @@ function prepAGrid(grid, goal_tile, floor_plan){
     for (var r = 0; r < grid.length; r++) {
         for (var c = 0; c < grid[0].length; c++) {
             switch (floor_plan[r][c]) {
-                case 0:
-                    grid[r][c][0] = true;
+                case 1:
+                    grid[r][c][0] = false;
                     break;
                 default:
-                    grid[r][c][0] = false;
+                    grid[r][c][0] = true;
             }
             
             //var cell_x = (c + 0.5) * groceryMap.tileSize;
             //var cell_y = (r + 0.5) * groceryMap.tileSize;
-            var cell_x = c;
-            var cell_y = r;
+            var cell_x = r;
+            var cell_y = c;
             grid[r][c][1] = [cell_x, cell_y];
             
             grid[r][c][2] = Number.MAX_VALUE;
@@ -266,7 +279,7 @@ function tracebackPath(grid, start, goal){
         }
         waypoints.unshift(grid[traceback[0]][traceback[1]][1]);
         traceback = grid[traceback[0]][traceback[1]][4];
-        debugger;
+        // debugger;
     }
     waypoints.unshift(grid[start[0]][start[1]][1]);
     //debugger;
