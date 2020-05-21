@@ -152,26 +152,6 @@
 //        }
 //    }
 
-function test_prepAGrid(){
-    var MAX = Number.MAX_VALUE;
-    var card = 1;
-    var diag = Math.sqrt(2);
-    
-    var grid = makeAGrid(2, 3);
-    prepAGrid(grid, [1, 1], [[0, 0, 0], [0, 0, 0]]);
-    var func_test = JSON.stringify(grid);
-    var control = JSON.stringify([[[true, [0,0], MAX, diag, [0, 0], false], [true, [0,1], MAX, card, [0, 0], false], [true, [0,2], MAX, diag, [0, 0], false]],
-                              [[true, [1,0], MAX, card, [0, 0], false], [true, [1,1], MAX, 0, [0, 0], false], [true, [1,2], MAX, card, [0, 0], false]]]);
-    if (func_test == control){
-        console.log("pass");
-    }
-    else{
-        console.log("fail");
-    }
-    console.log(func_test);
-    console.log(control);
-}
-
 // Test makeAGrid
 function test_makeAGrid(){
     if (JSON.stringify(makeAGrid(1, 1)) == JSON.stringify([[Array(6)]]) &&
@@ -183,6 +163,24 @@ function test_makeAGrid(){
        (JSON.stringify(makeAGrid(3, 2)) == JSON.stringify([[Array(6), Array(6)],
                                                            [Array(6), Array(6)],
                                                            [Array(6), Array(6)]]))){
+        console.log("pass");
+    }
+    else{
+        console.log("fail");
+    }
+}
+
+function test_prepAGrid(){
+    var MAX = Number.MAX_VALUE;
+    var card = 1;
+    var diag = Math.sqrt(2);
+    
+    var grid = makeAGrid(2, 3);
+    prepAGrid(grid, [1, 1], [[0, 0, 0], [0, 0, 0]]);
+    var func_test = JSON.stringify(grid);
+    var control = JSON.stringify([[[true, [0,0], MAX, diag, [0, 0], false], [true, [0,1], MAX, card, [0, 0], false], [true, [0,2], MAX, diag, [0, 0], false]],
+                              [[true, [1,0], MAX, card, [0, 0], false], [true, [1,1], MAX, 0, [0, 0], false], [true, [1,2], MAX, card, [0, 0], false]]]);
+    if (func_test == control){
         console.log("pass");
     }
     else{
