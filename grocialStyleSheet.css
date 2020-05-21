@@ -1,14 +1,19 @@
 body * {
-    font-family: Palatino, sans-serif;
+    font-family: Arial, sans-serif;
     font-size: 16px;
     box-sizing: border-box;
-    color: #2500a2;
-    border-color: #2500a2
+    color: #18655f;
+    border-color: #18655f;
 }
-header.big {
+.whitish {
+    color: #f4eee6;
     font-size: 32px;
-    color: white;
-    background-color: aqua;
+}
+.greenish {
+    color: #18655f;
+    font-size: 32px;
+}
+.big {
     text-align: center;
     margin-bottom: 10px;
 }
@@ -47,12 +52,13 @@ input, select {
     border: 1px solid;
     border-radius: 6px;
     resize: vertical;
+    background-color: #f4eee6;
 }
 input[type=checkbox] {
     width: 20%;
 }
 button.inForm {
-    background-color: white;
+    background-color: #f4eee6;
     width: 100%;
     border-radius: 6px;
     display: inline-block;
@@ -62,7 +68,7 @@ button.inForm {
     transition-duration: 0.3s;    
 }
 input:focus {
-    background-color: #9778ff;
+    background-color: #53af68;
     outline: none;
 }
 canvas {
@@ -73,12 +79,12 @@ canvas {
     border-radius: 6px;
 }
 body {
-    background-color: #3648ac;
+    background-color: #a5d3bd;
 }
 #debug {
     font-size: 12px;
     margin: auto;
-    color: white;
+    color: #f4eee6;
 }
 button.top {
     border: 2px solid;
@@ -87,10 +93,10 @@ button.top {
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    background-color: white;
+    background-color: #f4eee6;
     transition-duration: 0.3s;
 }
 button:hover {
-    background-color: #2500a2;
-    color: white;
+    background-color: #18655f;
+    color: #f4eee6;
 }
