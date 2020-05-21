@@ -7,11 +7,11 @@
     </head>
     <body>
         <div class="wrapper">
-            <button class="top" onclick="toggleMapBlock();">Toggle Map Grid</button>
-            <button class="top" onclick="changeMode(1)">User Edit</button>
-            <button class="top" onclick="populateMap();">Clear Map</button>
-            <button class="top" onclick="showMap(1);">Map 1</button>
-            <button class="top" onclick="toggleScreen();">Toggle Full Screen</button>
+            <button type="button" class="top" id="toggleMapBlock">Toggle Map Grid</button>
+            <button type="button" class="top" id="changeMode">User Edit</button>
+            <button type="button" class="top" id="populateMap">Clear Map</button>
+            <button type="button" class="top" id="showMap">Map 1</button>
+            <button type="button" class="top" id="toggleScreen">Toggle Full Screen</button>
         </div>
         <div id="wrap">
             <canvas id="background" style="z-index: 1">
@@ -29,12 +29,14 @@
                 <input type="number" id="distance" value=2><br>
                 <label for="placeholder">Something Else</label>
                 <input type="text" id="placeholder" value="yo fam"><br>
-                <button class="inForm" onclick="startSimulation();">Start Simulation</button>
+                <button type="button" class="inForm" id="startSimulation">Start Simulation</button>
             </form>
-            <p id="debug">hello world</p>
+            <p id="debug"></p>
         </div>
-        <script type="text/javascript" src = "globals.js"></script>
-        <script type="text/javascript" src = "pathfinding.js"></script>
-        <script type="text/javascript" src = "Grocial.js"></script> 
+        <script type="module" src="globals.js"></script>
+        <script type="module" src="Map.js"></script>
+        <script type="module" src="Person.js"></script>
+        <script type="module" src="pathfinding.js"></script>
+        <script type="module" src="Grocial.js"></script> 
     </body>
 </html>

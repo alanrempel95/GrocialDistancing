@@ -1,6 +1,10 @@
 //following comment lines are linter instructions
 /* eslint-env browser*/
 /*jslint browser: true*/
+import Person from "./Person.js";
+import {groceryMap} from "./globals.js";
+//import {createPeople} from "./pathfinding.js";
+import storeMap from "./Map.js";
 
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
@@ -8,50 +12,75 @@ var ctx = canvas.getContext("2d");
 var bkgrnd = document.getElementById("background");
 var bgctx = bkgrnd.getContext("2d");
 
-//set margin to -half_width and left:50% to vertically center
-canvas.width = groceryMap.tilesWide * groceryMap.tileSize;
-canvas.height = groceryMap.tilesHigh * groceryMap.tileSize;
-canvas.style.marginLeft = "-" + canvas.width / 2 + "px";
-
-bkgrnd.width = groceryMap.tilesWide * groceryMap.tileSize;
-bkgrnd.height = groceryMap.tilesHigh * groceryMap.tileSize;
-bkgrnd.style.marginLeft = "-" + bkgrnd.width / 2 + "px";
-
-ctx.imageSmoothingEnabled = false;
-bgctx.imageSmoothingEnabled = false;
-
-//element below absolute positioned canvases needs top margin offset
-var bottomDiv = document.getElementById("bottom");
-bottomDiv.style.marginTop = 20 + canvas.height + "px";
-
-//i hate event handling - store mouse position in global
-canvas.addEventListener('mousemove', function (event) {
+function debuggy(myHTML) {
     "use strict";
-    var rect = canvas.getBoundingClientRect();
-    groceryMap.mouseX = event.clientX - rect.left;
-    groceryMap.mouseY = event.clientY - rect.top;
-}, false);
+    var debugP = document.getElementById("debug");
+    debugP.innerHTML = myHTML;
+}
 
-canvas.addEventListener('mousedown', function (event) {
-    "use strict";
-    groceryMap.isDragging = true;
-    groceryMap.mouseButton = event.button;
-}, false);
+function setupCanvas(config, currentMap) {
+    //set margin to -half_width and left:50% to vertically center
+    canvas.width = currentMap.tilesWide * currentMap.tileSize;
+    canvas.height = currentMap.tilesHigh * currentMap.tileSize;
+    canvas.style.marginLeft = "-" + canvas.width / 2 + "px";
 
-canvas.addEventListener('mouseup', function (event) {
-    "use strict";
-    groceryMap.isDragging = false;
-    groceryMap.mouseButton = -1; //reset button index 
-    //generateMapBlock(); //update paragraph when user finishes line 
-}, false);
+    bkgrnd.width = currentMap.tilesWide * currentMap.tileSize;
+    bkgrnd.height = currentMap.tilesHigh * currentMap.tileSize;
+    bkgrnd.style.marginLeft = "-" + bkgrnd.width / 2 + "px";
 
-//disable right click menu in the canvas elements
-canvas.addEventListener("contextmenu", function (event) {
-    event.preventDefault();
-    return false;
-}, false);
+    ctx.imageSmoothingEnabled = false;
+    bgctx.imageSmoothingEnabled = false;
+
+    //element below absolute positioned canvases needs top margin offset
+    var bottomDiv = document.getElementById("bottom");
+    bottomDiv.style.marginTop = 20 + canvas.height + "px";
+
+    canvas.addEventListener('mousemove', function (event) {
+        //i hate event handling - store mouse position in global
+        "use strict";
+        var rect = canvas.getBoundingClientRect();
+        config.mouseX = event.clientX - rect.left;
+        config.mouseY = event.clientY - rect.top;
+    }, false);
+
+    canvas.addEventListener('mousedown', function (event) {
+        "use strict";
+        config.isDragging = true;
+        config.mouseButton = event.button;
+    }, false);
+
+    canvas.addEventListener('mouseup', function (event) {
+        "use strict";
+        config.isDragging = false;
+        config.mouseButton = -1; //reset button index 
+    }, false);
+
+
+    canvas.addEventListener("contextmenu", function (event) {
+        //disable right click menu in the canvas elements
+        "use strict";
+        event.preventDefault();
+        return false;
+    }, false);
+    
+    //link non-map related buttons
+    document.querySelector("#toggleMapBlock").addEventListener('click', toggleMapBlock);
+    document.querySelector("#toggleScreen").addEventListener('click', toggleScreen);
+    document.querySelector("#startSimulation").addEventListener('click', startSimulation);
+    
+    //input copyright
+    debuggy(config.copyright);
+}
+
+function linkButtons(currentMap) {
+    //function to add javascript to buttons - must run after map is initialized
+    document.querySelector("#changeMode").addEventListener('click', changeMode(1));
+    document.querySelector("#populateMap").addEventListener('click', currentMap.populateMap);
+    document.querySelector("#showMap").addEventListener('click', currentMap.showMap(2));
+}
 
 function toggleScreen() {
+    "use strict";
     var elem = document.documentElement;
     if (document.fullscreenElement === null) {
         elem.requestFullscreen();
@@ -69,187 +98,50 @@ function changeMode(myMode) {
     }
 }
 
-function showMap(mySelection) {
-    "use strict";
-    var myMap;
-    switch (mySelection) {
-        case 1:
-            myMap = map1;
-            break;
-        case 2:
-            myMap = map2;
-            break;
-        default:
-            groceryMap.floorPlan = map1.map(function (arr) {
-                return arr.slice();
-            });
-    }
-    groceryMap.floorPlan = myMap.map(function (arr) {
-        return arr.slice();
-    });
-    changeMode(2);
-}
-
-//initialize background/floor
-function populateMap() {
-    "use strict";
-    var k, l, i, j = 0;
-    //array of tile classifications
-    groceryMap.floorPlan = new Array(groceryMap.tilesWide);
-    for (k = 0; k < groceryMap.floorPlan.length; k++) {
-        groceryMap.floorPlan[k] = new Array(groceryMap.tilesHigh);
-    }
-    
-    //array of floor colors so nobody has a seizure
-    groceryMap.floorColor = new Array(groceryMap.tilesWide);
-    for (l = 0; l < groceryMap.floorColor.length; l++) {
-        groceryMap.floorColor[l] = new Array(groceryMap.tilesHigh);
-    }
-    
-    for (i = 0; i < groceryMap.tilesWide; i++) {
-        for (j = 0; j < groceryMap.tilesHigh; j++) {
-            //floor is different shades of light gray
-            groceryMap.floorColor[i][j] = 255 - Math.random() * 50;
-            
-            if (Math.random() < 1) { //set to less than one to make other color randomly            
-                groceryMap.floorPlan[i][j] = 0; //floor
-            } else {
-                groceryMap.floorPlan[i][j] = 2; //idk not floor or wall
-            }
-        }
-    }
-}
-
-//function to fill colors based on contents of groceryMap arrays
-function drawGrid() {
-    "use strict";
-    var i, j = 0,
-        bgColor = 128,
-        tileType = "";
-    for (i = 0; i < groceryMap.tilesWide; i++) {
-        for (j = 0; j < groceryMap.tilesHigh; j++) {
-            bgctx.beginPath();
-            bgctx.rect(i * groceryMap.tileSize, j * groceryMap.tileSize, groceryMap.tileSize, groceryMap.tileSize);
-            tileType = groceryMap.floorPlan[i][j];
-            
-            switch (tileType) {
-            case 0:
-                bgColor = groceryMap.floorColor[i][j];
-                bgctx.fillStyle = "rgb(" + bgColor + ", " + bgColor + ", " + bgColor + ")";
-                break;
-            case 1:
-                bgctx.fillStyle = "green";
-                break;
-            case 2:
-                bgctx.fillStyle = "blue";
-                break;
-            default:
-                bgctx.fillStyle = "black";
-            }
-            bgctx.fill();
-        }
-    }
-}
-
-//clicking and dragging will draw solid objects
-function userPopulateMap() {
+function userPopulateMap(config, currentMap) {
+    //clicking and dragging will draw solid objects
     "use strict";
     var k, l = 0;
-    if (groceryMap.isDragging) {
-        k = Math.floor(groceryMap.mouseX / groceryMap.tileSize);
-        l = Math.floor(groceryMap.mouseY / groceryMap.tileSize);
+    if (config.isDragging) {
+        k = Math.floor(config.mouseX / currentMap.tileSize);
+        l = Math.floor(config.mouseY / currentMap.tileSize);
         
-        if (groceryMap.mouseButton === 0) {
-            groceryMap.floorPlan[k][l] = 1; //wall
-        } else if (groceryMap.mouseButton === 2) {
-            groceryMap.floorPlan[k][l] = 2; //idk something else
+        if (config.mouseButton === 0) {
+            currentMap.floorPlan[k][l] = 1; //wall
+        } else if (config.mouseButton === 2) {
+            currentMap.floorPlan[k][l] = 2; //idk something else
         }
     }
 }
 
-//draw square at cursor
-function showCursor() {
+function showCursor(config, currentMap, myCanvas) {
+    //draw square at cursor
     "use strict";
     var k, l = 0;
-    k = Math.floor(groceryMap.mouseX / groceryMap.tileSize) * groceryMap.tileSize;
-    l = Math.floor(groceryMap.mouseY / groceryMap.tileSize) * groceryMap.tileSize;
-    //console.log(groceryMap.mouseX);
-    //console.log(k);
-    ctx.beginPath();
-    ctx.rect(k, l, groceryMap.tileSize, groceryMap.tileSize);
-    ctx.fillStyle = "red";
-    ctx.fill();
+    k = Math.floor(config.mouseX / currentMap.tileSize) * currentMap.tileSize;
+    l = Math.floor(config.mouseY / currentMap.tileSize) * currentMap.tileSize;
+    myCanvas.beginPath();
+    myCanvas.rect(k, l, currentMap.tileSize, currentMap.tileSize);
+    myCanvas.fillStyle = "red";
+    myCanvas.fill();
 }
 
-//function to return X, Y of person on A* path
-function handlePerson(maxX, maxY, myPerson) {
-    "use strict";
-    //if there's more path to travel, otherwise just stop. *Path* handling, not grocery list handling. 
-    if (myPerson.currentPoint < myPerson.currentPath.length - 1) {
-        var x_coord = (myPerson.currentPath[myPerson.currentPoint][0] + 0.5) * groceryMap.tileSize;
-        var y_coord = (myPerson.currentPath[myPerson.currentPoint][1] + 0.5) * groceryMap.tileSize;
-        var x_goal = (myPerson.currentPath[myPerson.currentPoint + 1][0] + 0.5) * groceryMap.tileSize;
-        var y_goal = (myPerson.currentPath[myPerson.currentPoint + 1][1] + 0.5) * groceryMap.tileSize;
-        var angle = Math.atan2((y_coord - y_goal), (x_coord - x_goal));
-        var x_speed = myPerson.velocity * Math.cos(angle);
-        var y_speed = myPerson.velocity * Math.sin(angle);
-        myPerson.personX -= x_speed;
-        myPerson.personY -= y_speed;
-
-        //if close enough to next node, change goal to next node
-        if (Math.abs(myPerson.personY - y_goal) < 5 && Math.abs(myPerson.personX - x_goal) < 5) {
-            myPerson.currentPoint++;
-        }
-    }
-    //if there's more goals in the grocery list, re-initialize for the next path travel. 
-    else if (myPerson.current_goal < myPerson.grocery_list.length - 1){
-        myPerson.current_goal++;
-        
-        var myStart = myPerson.grocery_list[myPerson.current_goal - 1];
-        var myGoal = myPerson.grocery_list[myPerson.current_goal];
-//        myGoal = [10, 10];
-//        myStart = [1, 1];
-        var myPath = getAPath(myStart, myGoal);
-        
-        myPerson.currentPath = myPath; //this is a reference, copy if needed
-        myPerson.currentPoint = 0; //first element of path
-        var x_coord = myPerson.currentPath[0][0];
-        var y_coord = myPerson.currentPath[0][1];
-        myPerson.personX = (x_coord + 0.5) * groceryMap.tileSize;
-        myPerson.personY = (y_coord + 0.5) * groceryMap.tileSize;
-        debugger;
-    }
-}
-
-function drawPerson() {
-    "use strict";
-    var i = 0;
-    for (i = 0; i < groceryMap.numberOfPeople; i++) {
-        handlePerson(groceryMap.tilesHigh * groceryMap.tileSize, groceryMap.tilesWide * groceryMap.tileSize, groceryMap.People[i]);
-        ctx.beginPath();
-        ctx.arc(groceryMap.People[i].personX, groceryMap.People[i].personY, groceryMap.People[i].personRadius, 0, 2 * Math.PI, false);
-        ctx.fillStyle = "purple";
-        ctx.fill();
-    }
-}
-
-function debuggy(myHTML) {
-    var debugP = document.getElementById("debug");
-    debugP.innerHTML = myHTML;
-}
-
-//from existing map, generates static array we can copy into program
 function toggleMapBlock() {
+    toggleMapBlockReal(groceryMap, newMap);
+}
+
+function toggleMapBlockReal(config, currentMap) {
+    //from existing map, generates static array we can copy into program
     "use strict";
     var i, j = 0,
         pText = "[[",
         tempText = "";
-    for (i = 0; i < groceryMap.tilesWide; i++) {
-        for (j = 0; j < groceryMap.tilesHigh; j++) {
-            tempText = groceryMap.floorPlan[i][j];
+    for (i = 0; i < currentMap.tilesWide; i += 1) {
+        for (j = 0; j < currentMap.tilesHigh; j += 1) {
+            tempText = currentMap.floorPlan[i][j];
             pText += tempText;
-            if (j === groceryMap.tilesHigh - 1) {
-                if (i === groceryMap.tilesWide - 1) {
+            if (j === currentMap.tilesHigh - 1) {
+                if (i === currentMap.tilesWide - 1) {
                     pText += "]]"; //last thing
                 } else {
                     pText += "],<br />["; //end of row
@@ -259,59 +151,97 @@ function toggleMapBlock() {
             }
         }
     }
-    if (groceryMap.showGrid) {
+    if (config.showGrid) {
         debuggy(pText);
     } else {
-        debuggy("no map");
+        debuggy(config.copyright);
     }
-    groceryMap.showGrid = !groceryMap.showGrid;
+    config.showGrid = !config.showGrid;
 }
 
-//clear, update, target 60 fps by default
 function gameLoop() {
+    //clear, update, target 60 fps by default
     "use strict";
+    var i = 0;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    newMap.drawGrid(ctx);
     if (groceryMap.mode === "user") {
-        userPopulateMap();
-        showCursor();
+        userPopulateMap(groceryMap, newMap);
+        showCursor(groceryMap, newMap, ctx);
     }
-    drawGrid();
-    drawPerson();
+    for (i = 0; i < groceryMap.numberOfPeople; i += 1) {
+        groceryMap.People[i].drawPerson(groceryMap, ctx);
+    }
     window.requestAnimationFrame(gameLoop);
 }
 
-//function to apply parameters and begin simulation
 function startSimulation() {
-    var populationBox = document.getElementById("population");
-    var distanceBox = document.getElementById("distance");
-    var otherBox = document.getElementById("placeholder");
-    groceryMap.maxShoppers = parseInt(populationBox.value);
-    groceryMap.targetSeparation = parseFloat(distanceBox.value);
-    groceryMap.otherThing = otherBox.value;
-    //testAStar();
+    startSimulationReal(groceryMap, newMap);
 }
 
-window.requestAnimationFrame(gameLoop);
-//functions here run once at the start
-populateMap();
-showMap(2);
+function startSimulationReal(config, currentMap) {
+    //function to apply parameters and begin simulation
+    "use strict";
+    var populationBox,
+        distanceBox,
+        otherBox;
+    populationBox = document.getElementById("population");
+    distanceBox = document.getElementById("distance");
+    otherBox = document.getElementById("placeholder");
+    config.maxShoppers = parseInt(populationBox.value, 10);
+    config.targetSeparation = parseFloat(distanceBox.value);
+    config.otherThing = otherBox.value;
+    
+    currentMap.showMap(2);
+    currentMap.get_goals();
+    createPeople(config, currentMap);
+    
+    linkButtons(currentMap);
+    
+    window.requestAnimationFrame(gameLoop);
+}
 
-function get_goals(){
-    groceryMap.goals = []
-    for (i = 0; i < groceryMap.tilesWide; i++) {
-        for (j = 0; j < groceryMap.tilesHigh; j++) {
-            if (groceryMap.floorPlan[i][j] == 2) {
-                groceryMap.goals.push([i, j]);
+function createPeople(config, currentMap) {
+    "use strict";
+    var i = 0,
+        myGoal = [0, 0],
+        myStart = [0, 0],
+        x_coord = 0,
+        y_coord = 0,
+        entrance = [12, 18],
+        myPath,
+        g = 0,
+        goal = [];
+    config.People = new Array(config.numberOfPeople);
+    for (i = 0; i < config.numberOfPeople; i += 1) {
+        config.People[i] = new Person(currentMap, 15 + 3 * Math.random(), 0, 0);
+        
+        //Construct grocery list
+        config.People[i].grocery_list.push(entrance);
+        for (g = 0; g < currentMap.goals.length; g += 1){
+            goal = currentMap.goals[g];
+            if (Math.random() < 0.5 && JSON.stringify(goal) != JSON.stringify(entrance)) {
+                config.People[i].grocery_list.push(goal);
             }
         }
+        config.People[i].grocery_list.push(entrance);
+        console.log(JSON.stringify(config.People[i].grocery_list))
+        
+        myStart = config.People[i].grocery_list[0];
+        myGoal = config.People[i].grocery_list[1];
+        myPath = config.People[i].getAPath(myStart, myGoal);
+        
+        config.People[i].currentPath = myPath; //this is a reference, copy if needed
+        config.People[i].currentPoint = 0; //first element of path
+        x_coord = config.People[i].currentPath[0][0];
+        y_coord = config.People[i].currentPath[0][1];
+        config.People[i].personX = (x_coord + 0.5) * currentMap.tileSize;
+        config.People[i].personY = (y_coord + 0.5) * currentMap.tileSize;
+        
     }
-    debugger;
 }
 
-get_goals()
-
-createPeople();
-//testAStar();
-//drawGrid();
-//test_makeAGrid();
-//test_prepAGrid();
+//functions here run once at the start
+var newMap = new storeMap(30, 30, 20);
+setupCanvas(groceryMap, newMap);
+newMap.populateMap();
