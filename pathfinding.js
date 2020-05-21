@@ -33,8 +33,8 @@ function createPeople() {
             }
         }
         groceryMap.People[i].grocery_list.push(entrance);
-        console.log(JSON.stringify(groceryMap.People[i].grocery_list))
-        debugger;
+//        console.log(JSON.stringify(groceryMap.People[i].grocery_list))
+//        debugger;
         
         myStart = groceryMap.People[i].grocery_list[0];
         myGoal = groceryMap.People[i].grocery_list[1];
@@ -303,7 +303,12 @@ function getAPath(start, goal){
     
     performAStar(nodes, start, goal);
     
-    return tracebackPath(nodes, start, goal);
+    var path = tracebackPath(nodes, start, goal);
+    debugger;
+    
+    smooth_path(path, 10);
+    
+    return path;
 }
 
 // Takes in a tile index, and returns the x, y of the tile's center. 
@@ -320,30 +325,30 @@ function xy_to_ind(tile){
     return [x_ind, y_ind];
 }
 
-// Given a start and end [x, y] tile index and a person (for their radius), determine if the 
+// Given a start and end [x, y] tile index and a person radius, determine if the 
 // person would collide in a direct path between the two tiles. Steps are *approximately* made 
 // in fifth-of-a-tile increments; although these increments can be smaller. 
-function checkCollide(start, goal, person){
+function checkCollide(start, goal, radius){
     var collide = false;
     
-    var tile_dist = distance(start, goal) * 30;
+    var tile_dist = distance(start, goal) * groceryMap.tileSize;
     var step = groceryMap.tileSize / 5;
     var steps_num = Math.ceil(tile_dist / step);
     
     var start_xy = ind_to_xy(start);
-    var goal_xy = ind_to_xy(end);
+    var goal_xy = ind_to_xy(goal);
     
-    var x_step = goal_xy[0] - start_xy[0] / steps_num;
-    var y_step = goal_xy[1] - start_xy[1] / steps_num;
+    var x_step = (goal_xy[0] - start_xy[0]) / steps_num;
+    var y_step = (goal_xy[1] - start_xy[1]) / steps_num;
     
     for (var i = 0; i <= steps_num; i++){
         var point_x = start_xy[0] + i * x_step;
         var point_y = start_xy[1] + i * y_step;
         
-        var sense_points = [[point_x - person.personRadius, point_y], 
-                            [point_x + person.personRadius, point_y], 
-                            [point_x, point_y - person.personRadius], 
-                            [point_x, point_y + person.personRadius]];
+        var sense_points = [[point_x - radius, point_y], 
+                            [point_x + radius, point_y], 
+                            [point_x, point_y - radius], 
+                            [point_x, point_y + radius]];
         
         var sense_tiles = sense_points.map(xy_to_ind);
         
@@ -356,6 +361,24 @@ function checkCollide(start, goal, person){
     
     return collide;
 }
+
+function smooth_path(path, radius){
+    var kept = 0;
+    var legal = false;
+    
+    while (kept < path.length - 2) {
+        legal = !checkCollide(path[kept], path[kept + 2], radius);
+        if (legal) {
+            path.splice(kept + 1, 1);
+        }
+        else {
+            kept++;
+        }
+    }
+    debugger;
+}
+
+
 
 // These are unused, for now. 
 //// Turn the (x, y) waypoints into (x, y, d) waypoints. This smoothed path should 

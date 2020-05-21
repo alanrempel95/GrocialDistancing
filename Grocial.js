@@ -217,7 +217,7 @@ function handlePerson(maxX, maxY, myPerson) {
         var y_coord = myPerson.currentPath[0][1];
         myPerson.personX = (x_coord + 0.5) * groceryMap.tileSize;
         myPerson.personY = (y_coord + 0.5) * groceryMap.tileSize;
-        debugger;
+        // debugger;
     }
 }
 
@@ -305,7 +305,7 @@ function get_goals(){
             }
         }
     }
-    debugger;
+    // debugger;
 }
 
 get_goals()
