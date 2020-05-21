@@ -235,6 +235,14 @@ function createPeople(config, currentMap) {
     }
 }
 
+function equidistantColors(count) {
+    var i = 0,
+        colors = [];
+    for (i = 0; i < count; i += 1) {
+        
+    }
+}
+
 function gameLoop() {
     //clear, update, target 60 fps by default
     "use strict";

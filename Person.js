@@ -185,17 +185,105 @@ export default class Person {
         waypoints.unshift(grid[start[0]][start[1]][1]);
         return waypoints;
     }
+    
+    ind_to_xy(tile){
+        // Takes in a tile index, and returns the x, y of the tile's center.
+        "use strict";
+        var x = 0,
+            y = 0;
+        x = (tile[0] + 0.5) * this.myMap.tileSize;
+        y = (tile[1] + 0.5) * this.myMap.tileSize;
+        return [x, y];
+    }
+     
+    xy_to_ind(tile) {
+        // Takes in ANY x, y and returns the tile that the point would fall in.
+        "use strict";
+        var x_ind = 0,
+            y_ind = 0;
+        x_ind = Math.floor(tile[0] / this.myMap.tileSize);
+        y_ind = Math.floor(tile[1] / this.myMap.tileSize);
+        return [x_ind, y_ind];
+    }
+     
+    checkCollide(start, goal, radius){
+        /* Given a start and end [x, y] tile index and a person radius, determine if the person would collide in a direct path between the two tiles. Steps are *approximately* made in fifth-of-a-tile increments; although these increments can be smaller. */
+        "use strict";
+        var collide = false,
+            tile_dist = 0,
+            step = 0,
+            steps_num = 0,
+            start_xy = [],
+            goal_xy = [],
+            point_x = 0,
+            point_y = 0,
+            x_step = 0,
+            y_step = 0,
+            sense_points = [],
+            sense_tiles = [],
+            i = 0,
+            j = 0;
 
+        tile_dist = this.distance(start, goal) * this.myMap.tileSize;
+        step = this.myMap.tileSize / 5;
+        steps_num = Math.ceil(tile_dist / step);
+
+        start_xy = this.ind_to_xy(start);
+        goal_xy = this.ind_to_xy(goal);
+
+        x_step = (goal_xy[0] - start_xy[0]) / steps_num;
+        y_step = (goal_xy[1] - start_xy[1]) / steps_num;
+
+        for (i = 0; i <= steps_num; i += 1){
+            point_x = start_xy[0] + i * x_step;
+            point_y = start_xy[1] + i * y_step;
+
+            sense_points = [[point_x - radius, point_y], 
+                            [point_x + radius, point_y], 
+                            [point_x, point_y - radius], 
+                            [point_x, point_y + radius]];
+
+            sense_tiles = sense_points.map(this.xy_to_ind, this);
+
+            for (j = 0; j < 4; j += 1){
+                if (this.myMap.floorPlan[sense_tiles[j][0]][sense_tiles[j][1]] === 1){
+                    collide = true;
+                }
+            }
+        }
+
+        return collide;
+    }
+    
+    smooth_path(path, radius){
+        "use strict";
+        var kept = 0,
+            legal = false;
+
+        while (kept < path.length - 2) {
+            legal = !this.checkCollide(path[kept], path[kept + 2], radius);
+            if (legal) {
+                path.splice(kept + 1, 1);
+            }
+            else {
+                kept += 1;
+            }
+        }
+        //debugger;
+    }
+    
     getAPath(start, goal){
         /* This should return a list of x, y waypoints on the optimal path, but this will change based on the Gama Sutra method. Person is the starting tile, goal is the ending tile. */
         "use strict";    
-        var nodes = this.makeAGrid(this.myMap.tilesWide, this.myMap.tilesHigh);
-
+        var nodes,
+            path;
+        
+        nodes = this.makeAGrid(this.myMap.tilesWide, this.myMap.tilesHigh);
         this.prepAGrid(nodes, goal, this.myMap.floorPlan);
-
         this.performAStar(nodes, start, goal);
-
-        return this.tracebackPath(nodes, start, goal);
+        path = this.tracebackPath(nodes, start, goal);
+        this.smooth_path(path, 10);
+        return path;
     }
     
     handlePerson(maxX, maxY) {
@@ -234,8 +322,8 @@ export default class Person {
             this.currentPoint = 0; //first element of path
             x_coord = this.currentPath[0][0];
             y_coord = this.currentPath[0][1];
-            this.personX = (x_coord + 0.5) * groceryMap.tileSize;
-            this.personY = (y_coord + 0.5) * groceryMap.tileSize;
+            this.personX = (x_coord + 0.5) * this.myMap.tileSize;
+            this.personY = (y_coord + 0.5) * this.myMap.tileSize;
             //debugger;
         }
     }
