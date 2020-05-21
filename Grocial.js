@@ -184,7 +184,7 @@ function showCursor() {
 //function to return X, Y of person on A* path
 function handlePerson(maxX, maxY, myPerson) {
     "use strict";
-    //if there's more path to travel, otherwise just stop
+    //if there's more path to travel, otherwise just stop. *Path* handling, not grocery list handling. 
     if (myPerson.currentPoint < myPerson.currentPath.length - 1) {
         var x_coord = (myPerson.currentPath[myPerson.currentPoint][0] + 0.5) * groceryMap.tileSize;
         var y_coord = (myPerson.currentPath[myPerson.currentPoint][1] + 0.5) * groceryMap.tileSize;
@@ -200,6 +200,24 @@ function handlePerson(maxX, maxY, myPerson) {
         if (Math.abs(myPerson.personY - y_goal) < 5 && Math.abs(myPerson.personX - x_goal) < 5) {
             myPerson.currentPoint++;
         }
+    }
+    //if there's more goals in the grocery list, re-initialize for the next path travel. 
+    else if (myPerson.current_goal < myPerson.grocery_list.length - 1){
+        myPerson.current_goal++;
+        
+        var myStart = myPerson.grocery_list[myPerson.current_goal - 1];
+        var myGoal = myPerson.grocery_list[myPerson.current_goal];
+//        myGoal = [10, 10];
+//        myStart = [1, 1];
+        var myPath = getAPath(myStart, myGoal);
+        
+        myPerson.currentPath = myPath; //this is a reference, copy if needed
+        myPerson.currentPoint = 0; //first element of path
+        var x_coord = myPerson.currentPath[0][0];
+        var y_coord = myPerson.currentPath[0][1];
+        myPerson.personX = (x_coord + 0.5) * groceryMap.tileSize;
+        myPerson.personY = (y_coord + 0.5) * groceryMap.tileSize;
+        debugger;
     }
 }
 

@@ -8,6 +8,7 @@ function Person(Radius, X, Y, turn) {
     this.direction = 0;
     this.velocity = 1; //px per frame?
     this.grocery_list = [];
+    this.current_goal = 1;
 }
 
 function createPeople() {
@@ -23,10 +24,7 @@ function createPeople() {
     for (var i = 0; i < groceryMap.numberOfPeople; i++) {
         groceryMap.People[i] = new Person(15 + 3 * Math.random(), 0, 0);
         
-        myGoal = [10, 10];
-        myStart = [1, 1];
-        myPath = getAPath(myStart, myGoal);
-        
+        // Construct grocery list
         groceryMap.People[i].grocery_list.push(entrance);
         for (var g = 0; g < groceryMap.goals.length; g++){
             var goal = groceryMap.goals[g];
@@ -37,6 +35,12 @@ function createPeople() {
         groceryMap.People[i].grocery_list.push(entrance);
         console.log(JSON.stringify(groceryMap.People[i].grocery_list))
         debugger;
+        
+        myStart = groceryMap.People[i].grocery_list[0];
+        myGoal = groceryMap.People[i].grocery_list[1];
+//        myGoal = [10, 10];
+//        myStart = [1, 1];
+        myPath = getAPath(myStart, myGoal);
         
         groceryMap.People[i].currentPath = myPath; //this is a reference, copy if needed
         groceryMap.People[i].currentPoint = 0; //first element of path
@@ -266,8 +270,8 @@ function performAStar(grid, start_tile, goal_tile){
     }
 }
 
-/* Traceback the path that ends at the goal tile via the grid (which should have)
-completed the A* algorithm mutation. */
+/* Traceback the path that ends at the goal tile via the grid (which should have
+completed the A* algorithm mutation). */
 function tracebackPath(grid, start, goal){
     var traceback = [goal[0], goal[1]];
     var waypoints = [];
@@ -302,13 +306,65 @@ function getAPath(start, goal){
     return tracebackPath(nodes, start, goal);
 }
 
-// Turn the (x, y) waypoints into (x, y, d) waypoints. This smoothed path should 
-// have at most as many points as the initial. 
-function smooth48(path){
-    
+// Takes in a tile index, and returns the x, y of the tile's center. 
+function ind_to_xy(tile){
+    var x = (tile[0] + 0.5) * groceryMap.tileSize;
+    var y = (tile[1] + 0.5) * groceryMap.tileSize;
+    return [x, y];
 }
 
-// Perform a D-8 A* search between two points. Returns (x, y, d) waypoints. 
-function getD8APath(person, goal){
-    
+// Takes in ANY x, y and returns the tile that the point would fall in. 
+function xy_to_ind(tile){
+    var x_ind = Math.floor(tile[0] / groceryMap.tileSize);
+    var y_ind = Math.floor(tile[1] / groceryMap.tileSize);
+    return [x_ind, y_ind];
 }
+
+// Given a start and end [x, y] tile index and a person (for their radius), determine if the 
+// person would collide in a direct path between the two tiles. Steps are *approximately* made 
+// in fifth-of-a-tile increments; although these increments can be smaller. 
+function checkCollide(start, goal, person){
+    var collide = false;
+    
+    var tile_dist = distance(start, goal) * 30;
+    var step = groceryMap.tileSize / 5;
+    var steps_num = Math.ceil(tile_dist / step);
+    
+    var start_xy = ind_to_xy(start);
+    var goal_xy = ind_to_xy(end);
+    
+    var x_step = goal_xy[0] - start_xy[0] / steps_num;
+    var y_step = goal_xy[1] - start_xy[1] / steps_num;
+    
+    for (var i = 0; i <= steps_num; i++){
+        var point_x = start_xy[0] + i * x_step;
+        var point_y = start_xy[1] + i * y_step;
+        
+        var sense_points = [[point_x - person.personRadius, point_y], 
+                            [point_x + person.personRadius, point_y], 
+                            [point_x, point_y - person.personRadius], 
+                            [point_x, point_y + person.personRadius]];
+        
+        var sense_tiles = sense_points.map(xy_to_ind);
+        
+        for (var j = 0; j < 4; j++){
+            if (groceryMap.floorPlan[sense_tiles[j][0]][sense_tiles[j][1]] == 1){
+                collide = true;
+            }
+        }
+    }
+    
+    return collide;
+}
+
+// These are unused, for now. 
+//// Turn the (x, y) waypoints into (x, y, d) waypoints. This smoothed path should 
+//// have at most as many points as the initial. 
+//function smooth48(path){
+//    
+//}
+//
+//// Perform a D-8 A* search between two points. Returns (x, y, d) waypoints. 
+//function getD8APath(person, goal){
+//    
+//}
