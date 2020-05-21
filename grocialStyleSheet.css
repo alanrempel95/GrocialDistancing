@@ -1,11 +1,17 @@
-* {
-    font-family: sans-serif;
+body * {
+    font-family: Palatino, sans-serif;
     font-size: 16px;
     box-sizing: border-box;
     color: #2500a2;
     border-color: #2500a2
 }
-
+header.big {
+    font-size: 32px;
+    color: white;
+    background-color: aqua;
+    text-align: center;
+    margin-bottom: 10px;
+}
 #wrap {
     position: relative;
     margin: auto;
@@ -25,17 +31,25 @@ form {
     width: 400px;
     text-align: left;
     display: inline-block;
+    vertical-align: top;
+}
+form.debug {
+    width: 200px;
 }
 label {
+    width: 70%;
     padding: 8px 8px 8px 0;
     display: inline-block;
 }
-input {
+input, select {
     width: 100%;
     padding: 8px;
     border: 1px solid;
     border-radius: 6px;
     resize: vertical;
+}
+input[type=checkbox] {
+    width: 20%;
 }
 button.inForm {
     background-color: white;
@@ -64,6 +78,7 @@ body {
 #debug {
     font-size: 12px;
     margin: auto;
+    color: white;
 }
 button.top {
     border: 2px solid;

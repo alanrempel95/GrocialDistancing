@@ -3,16 +3,10 @@
     <head>
         <meta charset="utf-8"/>
         <title></title>
-        <link rel="stylesheet" type="text/css" href="grocialStylesheet.css"/>
+        <link rel="stylesheet" type="text/css" href="grocialStylesheet.css?v=1"/>
     </head>
     <body>
-        <div class="wrapper">
-            <button type="button" class="top" id="toggleMapBlock">Toggle Map Grid</button>
-            <button type="button" class="top" id="changeMode">User Edit</button>
-            <button type="button" class="top" id="populateMap">Clear Map</button>
-            <button type="button" class="top" id="showMap">Map 1</button>
-            <button type="button" class="top" id="toggleScreen">Toggle Full Screen</button>
-        </div>
+        <header class="big">Grocial Distancing</header>
         <div id="wrap">
             <canvas id="background" style="z-index: 1">
                 //this is the tiled/battle background
@@ -22,14 +16,28 @@
             </canvas>
         </div>
         <div class="wrapper" id="bottom">
-            <form>
+            <form class="config">
                 <label for="population">Max Shoppers</label>
                 <input type="number" id="population" value=10><br>
                 <label for="distance">Mandated Separation</label>
                 <input type="number" id="distance" value=2><br>
-                <label for="placeholder">Something Else</label>
-                <input type="text" id="placeholder" value="yo fam"><br>
+                <label for="maskWearing">Mask-Wearing Compliance</label>
+                <input type="number" id="maskWearing" value=0.9>
+                <label for="mapSelect">Select Map</label>
+                <select id="mapSelect">
+                    <option value="SNB">ShopRite of North Bergen</option>
+                    <option value="SH">ShopRite of Hoboken</option>
+                    <option value="TJH">Trader Joe's of Hoboken</option>
+                    <option value="TJM">Trader Joe's of Manhattan</option>
+                    <option value="User">User Defined</option>
+                </select><br>
                 <button type="button" class="inForm" id="startSimulation">Start Simulation</button>
+            </form>
+            <form class="debug">
+                <label for="showGrid">Show Map Grid</label>
+                <input type="checkbox" id="showGrid">
+                <label for="showFullscreen">Fullscreen</label>
+                <input type="checkbox" id="showFullscreen">
             </form>
             <p id="debug"></p>
         </div>

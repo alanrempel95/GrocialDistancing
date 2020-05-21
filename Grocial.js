@@ -64,9 +64,12 @@ function setupCanvas(config, currentMap) {
     }, false);
     
     //link non-map related buttons
-    document.querySelector("#toggleMapBlock").addEventListener('click', toggleMapBlock);
-    document.querySelector("#toggleScreen").addEventListener('click', toggleScreen);
-    document.querySelector("#startSimulation").addEventListener('click', startSimulation);
+    var gridCheck = document.getElementById("showGrid");
+    gridCheck.addEventListener('click', toggleMapBlock);
+    var screenCheck = document.getElementById("showFullscreen");
+    screenCheck.addEventListener('click', toggleScreen);
+    var startButton = document.getElementById("startSimulation");
+    startButton.addEventListener('click', startSimulation);
     
     //input copyright
     debuggy(config.copyright);
@@ -74,9 +77,9 @@ function setupCanvas(config, currentMap) {
 
 function linkButtons(currentMap) {
     //function to add javascript to buttons - must run after map is initialized
-    document.querySelector("#changeMode").addEventListener('click', changeMode(1));
-    document.querySelector("#populateMap").addEventListener('click', currentMap.populateMap);
-    document.querySelector("#showMap").addEventListener('click', currentMap.showMap(2));
+    document.getElementById("changeMode").addEventListener('click', changeMode(1));
+    document.getElementById("populateMap").addEventListener('click', clearMap);
+    document.getElementById("showMap").addEventListener('click', currentMap.showMap(2));
 }
 
 function toggleScreen() {
@@ -89,6 +92,12 @@ function toggleScreen() {
     }
 }
 
+function clearMap() {
+    //TODO - determine why I can't use function arguments in buttons
+    "use strict";
+    newMap.populateMap();
+}
+
 function changeMode(myMode) {
     "use strict";
     if (myMode === 1) {
@@ -96,6 +105,7 @@ function changeMode(myMode) {
     } else {
         groceryMap.mode = "fixed";
     }
+    //return false;
 }
 
 function userPopulateMap(config, currentMap) {
@@ -159,22 +169,6 @@ function toggleMapBlockReal(config, currentMap) {
     config.showGrid = !config.showGrid;
 }
 
-function gameLoop() {
-    //clear, update, target 60 fps by default
-    "use strict";
-    var i = 0;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    newMap.drawGrid(ctx);
-    if (groceryMap.mode === "user") {
-        userPopulateMap(groceryMap, newMap);
-        showCursor(groceryMap, newMap, ctx);
-    }
-    for (i = 0; i < groceryMap.numberOfPeople; i += 1) {
-        groceryMap.People[i].drawPerson(groceryMap, ctx);
-    }
-    window.requestAnimationFrame(gameLoop);
-}
-
 function startSimulation() {
     startSimulationReal(groceryMap, newMap);
 }
@@ -182,21 +176,21 @@ function startSimulation() {
 function startSimulationReal(config, currentMap) {
     //function to apply parameters and begin simulation
     "use strict";
+    window.cancelAnimationFrame(gameLoop);
+    
     var populationBox,
         distanceBox,
-        otherBox;
+        maskBox;
     populationBox = document.getElementById("population");
     distanceBox = document.getElementById("distance");
-    otherBox = document.getElementById("placeholder");
+    maskBox = document.getElementById("maskWearing");
     config.maxShoppers = parseInt(populationBox.value, 10);
     config.targetSeparation = parseFloat(distanceBox.value);
-    config.otherThing = otherBox.value;
+    config.otherThing = maskBox.value;
     
     currentMap.showMap(2);
     currentMap.get_goals();
     createPeople(config, currentMap);
-    
-    linkButtons(currentMap);
     
     window.requestAnimationFrame(gameLoop);
 }
@@ -214,7 +208,7 @@ function createPeople(config, currentMap) {
         goal = [];
     config.People = new Array(config.numberOfPeople);
     for (i = 0; i < config.numberOfPeople; i += 1) {
-        config.People[i] = new Person(currentMap, 15 + 3 * Math.random(), 0, 0);
+        config.People[i] = new Person(currentMap, 10 + 3 * Math.random(), 0, 0);
         
         //Construct grocery list
         config.People[i].grocery_list.push(entrance);
@@ -241,7 +235,23 @@ function createPeople(config, currentMap) {
     }
 }
 
+function gameLoop() {
+    //clear, update, target 60 fps by default
+    "use strict";
+    var i = 0;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    newMap.drawGrid(ctx);
+    if (groceryMap.mode === "user") {
+        userPopulateMap(groceryMap, newMap);
+        showCursor(groceryMap, newMap, ctx);
+    }
+    for (i = 0; i < groceryMap.numberOfPeople; i += 1) {
+        groceryMap.People[i].drawPerson(groceryMap, ctx);
+    }
+    window.requestAnimationFrame(gameLoop);
+}
+
 //functions here run once at the start
-var newMap = new storeMap(30, 30, 20);
+var newMap = new storeMap(25, 30, 20);
 setupCanvas(groceryMap, newMap);
 newMap.populateMap();
