@@ -1,7 +1,7 @@
 /* eslint-env browser*/
 import {groceryMap} from "./globals.js";
 export default class Person {
-    constructor(myMap, Radius, X, Y, turn) {
+    constructor(myMap, Radius, X, Y, turn, color) {
         "use strict";
         this.personRadius = Radius;
         this.personX = X;
@@ -13,6 +13,7 @@ export default class Person {
         this.grocery_list = [];
         this.myMap = myMap,
         this.currentGoal = 1;
+        this.color = color;
         this.covid_scanner = Array(60);
         this.covid_level = 0.0;
         
@@ -343,14 +344,15 @@ export default class Person {
         this.covid_scanner.push(this.covid_rank() / 60);
     }
        
-    drawPerson(config, myCanvas) {
+    drawPerson(myCanvas) {
         "use strict";
-        var i = 0;
         this.handlePerson(this.myMap.tilesHigh * this.myMap.tileSize, this.myMap.tilesWide * this.myMap.tileSize);
         myCanvas.beginPath();
         myCanvas.arc(this.personX, this.personY, this.personRadius, 0, 2 * Math.PI, false);
-        myCanvas.fillStyle = "purple";
+        myCanvas.fillStyle = this.color;
         myCanvas.fill();
+        myCanvas.strokeStyle = "black";
+        myCanvas.stroke();
     }
     
     covidFunc(dist) {
