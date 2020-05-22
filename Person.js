@@ -1,6 +1,6 @@
 /* eslint-env browser*/
 export default class Person {
-    constructor(myMap, Radius, X, Y, turn) {
+    constructor(myMap, Radius, X, Y, turn, color) {
         "use strict";
         this.personRadius = Radius;
         this.personX = X;
@@ -10,7 +10,8 @@ export default class Person {
         this.velocity = 1; //px per frame?
         this.grocery_list = [];
         this.myMap = myMap,
-        this.currentGoal = 1;
+        this.currentGoal = 1,
+        this.color = color;
     }
 
     distance(node, goal) {
@@ -333,7 +334,9 @@ export default class Person {
         this.handlePerson(this.myMap.tilesHigh * this.myMap.tileSize, this.myMap.tilesWide * this.myMap.tileSize);
         myCanvas.beginPath();
         myCanvas.arc(this.personX, this.personY, this.personRadius, 0, 2 * Math.PI, false);
-        myCanvas.fillStyle = "purple";
+        myCanvas.fillStyle = this.color;
         myCanvas.fill();
+        myCanvas.strokeStyle = "black";
+        myCanvas.stroke();
     }
 }

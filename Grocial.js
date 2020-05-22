@@ -205,10 +205,11 @@ function createPeople(config, currentMap) {
         entrance = [12, 18],
         myPath,
         g = 0,
-        goal = [];
-    config.People = new Array(config.numberOfPeople);
+        goal = [],
+        colors = equidistantColors(config.numberOfPeople);
+    config.People = [];
     for (i = 0; i < config.numberOfPeople; i += 1) {
-        config.People[i] = new Person(currentMap, 10 + 3 * Math.random(), 0, 0);
+        config.People[i] = new Person(currentMap, 10 + 3 * Math.random(), 0, 0, 0, colors[i]);
         
         //Construct grocery list
         config.People[i].grocery_list.push(entrance);
@@ -236,17 +237,65 @@ function createPeople(config, currentMap) {
 }
 
 function equidistantColors(count) {
+    "use strict";
     var i = 0,
-        colors = [];
+        colors = [],
+        hexColors = [];
     for (i = 0; i < count; i += 1) {
-        
+        colors[i] = HSVtoRGB(fmod(i * 0.618033988749895, 1.0),
+                    0.5,
+                    Math.sqrt(1.0 - fmod(i * 0.618033988749895, 0.5)));
+        hexColors[i] = rgbToHex(colors[i].r, colors[i].g, colors[i].b);
+        console.log(hexColors[i]);
     }
+    return hexColors;
 }
 
-//function fmod(x, y) {
-//    var  
-//    return x % y;
-//}
+function rgbToHex(r, g, b) {
+    "use strict";
+    var rt,
+        gt,
+        bt;
+    rt = r.toString(16);
+    rt = rt.length == 1 ? "0" + rt : rt;
+    gt = g.toString(16);
+    gt = gt.length == 1 ? "0" + gt : gt;
+    bt = b.toString(16);
+    bt = bt.length == 1 ? "0" + bt : bt;
+    return "#" + rt + gt + bt;
+}
+
+function fmod(x, y) {
+    "use strict";
+    var tquot = Math.trunc(x / y);
+    return x - tquot * y;
+}
+
+function HSVtoRGB(h, s, v) {
+    "use strict";
+    var r, g, b, i, f, p, q, t;
+    if (arguments.length === 1) {
+        s = h.s, v = h.v, h = h.h;
+    }
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+    };
+}
 
 function gameLoop() {
     //clear, update, target 60 fps by default
@@ -265,6 +314,7 @@ function gameLoop() {
 }
 
 //functions here run once at the start
+equidistantColors(10);
 var newMap = new storeMap(25, 30, 20);
 setupCanvas(groceryMap, newMap);
 newMap.populateMap();
