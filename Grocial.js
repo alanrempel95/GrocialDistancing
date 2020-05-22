@@ -176,8 +176,6 @@ function startSimulation() {
 function startSimulationReal(config, currentMap) {
     //function to apply parameters and begin simulation
     "use strict";
-    window.cancelAnimationFrame(gameLoop);
-    
     var populationBox,
         distanceBox,
         maskBox;
@@ -191,11 +189,13 @@ function startSimulationReal(config, currentMap) {
     currentMap.showMap(2);
     currentMap.get_goals();
     createPeople(config, currentMap);
-    
-    window.requestAnimationFrame(gameLoop);
 }
 
-function createPeople(config, currentMap) {
+function sleep(millis) {
+    return new Promise(resolve => setTimeout(resolve, millis));
+}
+
+async function createPeople(config, currentMap) {
     "use strict";
     var i = 0,
         myGoal = [0, 0],
@@ -206,9 +206,9 @@ function createPeople(config, currentMap) {
         myPath,
         g = 0,
         goal = [];
-    config.People = new Array(config.numberOfPeople);
+    config.People = [];
     for (i = 0; i < config.numberOfPeople; i += 1) {
-        config.People[i] = new Person(currentMap, 10 + 3 * Math.random(), 0, 0);
+        config.People.push(new Person(currentMap, 10 + 3 * Math.random(), 0, 0));
         
         //Construct grocery list
         config.People[i].grocery_list.push(entrance);
@@ -232,6 +232,7 @@ function createPeople(config, currentMap) {
         config.People[i].personX = (x_coord + 0.5) * currentMap.tileSize;
         config.People[i].personY = (y_coord + 0.5) * currentMap.tileSize;
         
+        await sleep(1000);
     }
 }
 
@@ -253,9 +254,17 @@ function gameLoop() {
         userPopulateMap(groceryMap, newMap);
         showCursor(groceryMap, newMap, ctx);
     }
-    for (i = 0; i < groceryMap.numberOfPeople; i += 1) {
+    for (i = 0; i < groceryMap.People.length; i += 1) {
         groceryMap.People[i].drawPerson(groceryMap, ctx);
     }
+    
+    groceryMap.avg_covid_level = 0;
+    for (i = 0; i < groceryMap.People.length; i += 1) {
+        groceryMap.avg_covid_level += groceryMap.People[i].covid_level;
+        //debugger;
+    }
+    groceryMap.avg_covid_level = groceryMap.avg_covid_level / groceryMap.People.length;
+    debuggy(groceryMap.avg_covid_level);
     window.requestAnimationFrame(gameLoop);
 }
 
@@ -263,3 +272,5 @@ function gameLoop() {
 var newMap = new storeMap(25, 30, 20);
 setupCanvas(groceryMap, newMap);
 newMap.populateMap();
+startSimulation();
+window.requestAnimationFrame(gameLoop);

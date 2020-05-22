@@ -1,4 +1,5 @@
 /* eslint-env browser*/
+import {groceryMap} from "./globals.js";
 export default class Person {
     constructor(myMap, Radius, X, Y, turn) {
         "use strict";
@@ -8,9 +9,16 @@ export default class Person {
         this.personTurnRad = turn;
         this.direction = 0;
         this.velocity = 1; //px per frame?
+        this.waiting = false;
         this.grocery_list = [];
         this.myMap = myMap,
         this.currentGoal = 1;
+        this.covid_scanner = Array(60);
+        this.covid_level = 0.0;
+        
+        for (var i = 0; i < this.covid_scanner.length; i++){
+            this.covid_scanner[i] = 0;
+        }
     }
 
     distance(node, goal) {
@@ -286,11 +294,11 @@ export default class Person {
         return path;
     }
     
-    handlePerson(maxX, maxY) {
+    async handlePerson(maxX, maxY) {
         /* function to return X, Y of person on A* path */
         "use strict";
         //if there's more path to travel, otherwise just stop. *Path* handling, not grocery list handling. 
-        if (this.currentPoint < this.currentPath.length - 1) {
+        if (this.currentPoint < this.currentPath.length - 1 && !this.waiting) {
             var x_coord = (this.currentPath[this.currentPoint][0] + 0.5) * this.myMap.tileSize;
             var y_coord = (this.currentPath[this.currentPoint][1] + 0.5) * this.myMap.tileSize;
             var x_goal = (this.currentPath[this.currentPoint + 1][0] + 0.5) * this.myMap.tileSize;
@@ -305,7 +313,7 @@ export default class Person {
             if (Math.abs(this.personY - y_goal) < 5 && Math.abs(this.personX - x_goal) < 5) {
                 this.currentPoint++;
             }
-        } else if (this.currentGoal < this.grocery_list.length - 1) {
+        } else if (this.currentGoal < this.grocery_list.length - 1 && !this.waiting) {
             //if there's more goals in the grocery list, re-initialize for the next path travel. 
             var myStart = [],
                 myGoal = [],
@@ -325,18 +333,49 @@ export default class Person {
             this.personX = (x_coord + 0.5) * this.myMap.tileSize;
             this.personY = (y_coord + 0.5) * this.myMap.tileSize;
             //debugger;
+            this.waiting = true;
+            await this.sleep(1000);
+            this.waiting = false;
         }
+
+        this.covid_level -= this.covid_scanner.shift();
+        this.covid_level += this.covid_rank() / 60;
+        this.covid_scanner.push(this.covid_rank() / 60);
     }
        
     drawPerson(config, myCanvas) {
         "use strict";
         var i = 0;
-        for (i = 0; i < config.numberOfPeople; i++) {
-            this.handlePerson(this.myMap.tilesHigh * this.myMap.tileSize, this.myMap.tilesWide * this.myMap.tileSize);
-            myCanvas.beginPath();
-            myCanvas.arc(this.personX, this.personY, this.personRadius, 0, 2 * Math.PI, false);
-            myCanvas.fillStyle = "purple";
-            myCanvas.fill();
+        this.handlePerson(this.myMap.tilesHigh * this.myMap.tileSize, this.myMap.tilesWide * this.myMap.tileSize);
+        myCanvas.beginPath();
+        myCanvas.arc(this.personX, this.personY, this.personRadius, 0, 2 * Math.PI, false);
+        myCanvas.fillStyle = "purple";
+        myCanvas.fill();
+    }
+    
+    covidFunc(dist) {
+        return Math.min(0.5, 15.0 / dist);
+    }
+    
+    covid_rank() {
+        var i = 0,
+            dist = 0,
+            rank = 0,
+            people = groceryMap.People;
+        for (i = 0; i < people.length; i++){
+            if (this !== (people[i])){
+                dist = this.distance([this.personX, this.personY], [groceryMap.People[i].personX, groceryMap.People[i].personY]);
+                if (dist <= groceryMap.targetSeparation){
+                    rank += this.covidFunc(dist);
+                }
+                console.log("NO TOUCHA THA CHILE!");
+                debugger;
+            }
         }
+        return rank;
+    }
+    
+    sleep(millis) {
+        return new Promise(resolve => setTimeout(resolve, millis));
     }
 }

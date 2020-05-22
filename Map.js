@@ -90,6 +90,7 @@ export default class storeMap {
     
     get_goals() {
         "use strict";
+        this.goals = [];
         var i = 0,
             j = 0;
         for (i = 0; i < this.tilesWide; i += 1) {

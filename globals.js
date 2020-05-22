@@ -9,6 +9,7 @@ let groceryMap = {
     showGrid: true,
     targetSeparation: 1,
     maskCompliance: 0,
+    avg_covid_level: 0,
     copyright: "Copyright &copy; 2020 Alan Rempel &amp; Jordan Fernandes."
 };
 
