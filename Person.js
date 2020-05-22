@@ -328,15 +328,12 @@ export default class Person {
         }
     }
        
-    drawPerson(config, myCanvas) {
+    drawPerson(myCanvas) {
         "use strict";
-        var i = 0;
-        for (i = 0; i < config.numberOfPeople; i++) {
-            this.handlePerson(this.myMap.tilesHigh * this.myMap.tileSize, this.myMap.tilesWide * this.myMap.tileSize);
-            myCanvas.beginPath();
-            myCanvas.arc(this.personX, this.personY, this.personRadius, 0, 2 * Math.PI, false);
-            myCanvas.fillStyle = "purple";
-            myCanvas.fill();
-        }
+        this.handlePerson(this.myMap.tilesHigh * this.myMap.tileSize, this.myMap.tilesWide * this.myMap.tileSize);
+        myCanvas.beginPath();
+        myCanvas.arc(this.personX, this.personY, this.personRadius, 0, 2 * Math.PI, false);
+        myCanvas.fillStyle = "purple";
+        myCanvas.fill();
     }
 }

@@ -176,7 +176,7 @@ function startSimulation() {
 function startSimulationReal(config, currentMap) {
     //function to apply parameters and begin simulation
     "use strict";
-    window.cancelAnimationFrame(gameLoop);
+    //window.cancelAnimationFrame(gameLoop);
     
     var populationBox,
         distanceBox,
@@ -192,7 +192,7 @@ function startSimulationReal(config, currentMap) {
     currentMap.get_goals();
     createPeople(config, currentMap);
     
-    window.requestAnimationFrame(gameLoop);
+    //window.requestAnimationFrame(gameLoop);
 }
 
 function createPeople(config, currentMap) {
@@ -243,6 +243,11 @@ function equidistantColors(count) {
     }
 }
 
+//function fmod(x, y) {
+//    var  
+//    return x % y;
+//}
+
 function gameLoop() {
     //clear, update, target 60 fps by default
     "use strict";
@@ -254,7 +259,7 @@ function gameLoop() {
         showCursor(groceryMap, newMap, ctx);
     }
     for (i = 0; i < groceryMap.numberOfPeople; i += 1) {
-        groceryMap.People[i].drawPerson(groceryMap, ctx);
+        groceryMap.People[i].drawPerson(ctx);
     }
     window.requestAnimationFrame(gameLoop);
 }
@@ -263,3 +268,5 @@ function gameLoop() {
 var newMap = new storeMap(25, 30, 20);
 setupCanvas(groceryMap, newMap);
 newMap.populateMap();
+startSimulation();
+window.requestAnimationFrame(gameLoop);
