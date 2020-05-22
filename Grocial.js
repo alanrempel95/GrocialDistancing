@@ -213,7 +213,7 @@ async function createPeople(config, currentMap) {
         colors = equidistantColors(config.numberOfPeople);
     config.People = [];
     for (i = 0; i < config.numberOfPeople; i += 1) {
-        config.People[i] = new Person(currentMap, 10 + 3 * Math.random(), 0, 0, 0, colors[i]);
+        config.People.push(new Person(currentMap, 10 + 3 * Math.random(), 0, 0, 0, colors[i]));
         
         //Construct grocery list
         config.People[i].grocery_list.push(entrance);
@@ -312,7 +312,7 @@ function gameLoop() {
         userPopulateMap(groceryMap, newMap);
         showCursor(groceryMap, newMap, ctx);
     }
-    for (i = 0; i < groceryMap.numberOfPeople; i += 1) {
+    for (i = 0; i < groceryMap.People.length; i += 1) {
         groceryMap.People[i].drawPerson(ctx);
     }
     
