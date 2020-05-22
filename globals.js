@@ -4,12 +4,11 @@ let groceryMap = {
     mouseY: 0,
     isDragging: false,
     mouseButton: -1,
-    numberOfPeople: 1,
+    numberOfPeople: 10,
     mode: "user",
     showGrid: true,
-    maxShoppers: 0,
     targetSeparation: 1,
-    otherThing: "",
+    maskCompliance: 0,
     copyright: "Copyright &copy; 2020 Alan Rempel &amp; Jordan Fernandes."
 };
 

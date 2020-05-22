@@ -305,17 +305,17 @@ export default class Person {
             if (Math.abs(this.personY - y_goal) < 5 && Math.abs(this.personX - x_goal) < 5) {
                 this.currentPoint++;
             }
-        } else if (this.current_goal < this.grocery_list.length - 1) {
+        } else if (this.currentGoal < this.grocery_list.length - 1) {
             //if there's more goals in the grocery list, re-initialize for the next path travel. 
             var myStart = [],
                 myGoal = [],
                 myPath,
                 x_coord = 0,
                 y_coord = 0;
-            this.current_goal++;
+            this.currentGoal++;
 
-            myStart = this.grocery_list[this.current_goal - 1];
-            myGoal = this.grocery_list[this.current_goal];
+            myStart = this.grocery_list[this.currentGoal - 1];
+            myGoal = this.grocery_list[this.currentGoal];
             myPath = this.getAPath(myStart, myGoal);
 
             this.currentPath = myPath; //this is a reference, copy if needed

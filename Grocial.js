@@ -184,9 +184,9 @@ function startSimulationReal(config, currentMap) {
     populationBox = document.getElementById("population");
     distanceBox = document.getElementById("distance");
     maskBox = document.getElementById("maskWearing");
-    config.maxShoppers = parseInt(populationBox.value, 10);
+    config.numberOfPeople = parseInt(populationBox.value, 10);
     config.targetSeparation = parseFloat(distanceBox.value);
-    config.otherThing = maskBox.value;
+    config.maskCompliance = maskBox.value;
     
     currentMap.showMap(2);
     currentMap.get_goals();
