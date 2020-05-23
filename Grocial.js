@@ -97,6 +97,8 @@ function changeMap() {
         newMap.showMap(1);
         //startSimulation();
     } else if (selected === "User") {
+        groceryMap.numberOfPeople = 0;
+        groceryMap.People = [];
         newMap.populateMap();
     }
 }
