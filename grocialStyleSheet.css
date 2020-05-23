@@ -6,11 +6,13 @@ body * {
     border-color: #18655f;
 }
 .whitish {
+    font-family: Verdana;
     color: #f4eee6;
     font-size: 32px;
     font-weight: 600;
 }
 .greenish {
+    font-family: Verdana;
     color: #18655f;
     font-size: 32px;
     font-weight: 600;
@@ -30,6 +32,11 @@ body * {
 #bottom {
 
 }
+#infectivity {
+    display: inline;
+    color: red;
+    width: auto;
+}
 form {
     border-radius: 8px;
     background-color: #c1c1c1;
@@ -41,7 +48,7 @@ form {
     vertical-align: top;
 }
 form.debug {
-    width: 200px;
+    width: 250px;
 }
 label {
     width: 70%;
