@@ -15,7 +15,7 @@ export default class Person {
         this.currentGoal = 1;
         this.color = color;
         this.covid_scanner = Array(60);
-        this.covid_level = 0.0;
+        this.covid_sum = 0.0;
         
         for (var i = 0; i < this.covid_scanner.length; i++){
             this.covid_scanner[i] = 0;
@@ -338,10 +338,16 @@ export default class Person {
             await this.sleep(1000);
             this.waiting = false;
         }
+        else if (this.currentGoal == this.grocery_list.length - 1 && !this.waiting){
+            for (var i = 0; i < groceryMap.People.length; i++){
+                if(groceryMap.People[i] === this){
+                    groceryMap.base_covid_level += this.covid_sum;
+                    groceryMap.People.splice(i, 1);
+                }
+            }
+        }
 
-        this.covid_level -= this.covid_scanner.shift();
-        this.covid_level += this.covid_rank() / 60;
-        this.covid_scanner.push(this.covid_rank() / 60);
+        this.covid_sum += this.covid_rank() / 60;
     }
        
     drawPerson(myCanvas) {
@@ -366,11 +372,10 @@ export default class Person {
             people = groceryMap.People;
         for (i = 0; i < people.length; i++){
             if (this !== (people[i])){
-                dist = this.distance([this.personX, this.personY], [groceryMap.People[i].personX, groceryMap.People[i].personY]);
+                dist = this.distance([this.personX, this.personY], [groceryMap.People[i].personX, groceryMap.People[i].personY]) / this.myMap.tileSize;
                 if (dist <= groceryMap.targetSeparation){
                     rank += this.covidFunc(dist);
                 }
-                console.log("NO TOUCHA THA CHILE!");
                 debugger;
             }
         }

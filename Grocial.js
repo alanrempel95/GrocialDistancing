@@ -18,6 +18,12 @@ function debuggy(myHTML) {
     debugP.innerHTML = myHTML;
 }
 
+function recordScore(myHTML) {
+    "use strict";
+    var debugP = document.getElementById("infectivity");
+    debugP.innerHTML = myHTML;
+}
+
 function setupCanvas(config, currentMap) {
     //set margin to -half_width and left:50% to vertically center
     canvas.width = currentMap.tilesWide * currentMap.tileSize;
@@ -199,6 +205,13 @@ function sleep(millis) {
     return new Promise(resolve => setTimeout(resolve, millis));
 }
 
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
 async function createPeople(config, currentMap) {
     "use strict";
     var i = 0,
@@ -216,14 +229,16 @@ async function createPeople(config, currentMap) {
         config.People.push(new Person(currentMap, 10 + 3 * Math.random(), 0, 0, 0, colors[i]));
         
         //Construct grocery list
-        config.People[i].grocery_list.push(entrance);
         for (g = 0; g < currentMap.goals.length; g += 1){
             goal = currentMap.goals[g];
             if (Math.random() < 0.5 && JSON.stringify(goal) != JSON.stringify(entrance)) {
                 config.People[i].grocery_list.push(goal);
             }
         }
+        shuffleArray(config.People[i].grocery_list);
+        config.People[i].grocery_list.unshift(entrance);
         config.People[i].grocery_list.push(entrance);
+        
         console.log(JSON.stringify(config.People[i].grocery_list))
         
         myStart = config.People[i].grocery_list[0];
@@ -316,13 +331,14 @@ function gameLoop() {
         groceryMap.People[i].drawPerson(ctx);
     }
     
-    groceryMap.avg_covid_level = 0;
+    groceryMap.avg_covid_level = groceryMap.base_covid_level;
     for (i = 0; i < groceryMap.People.length; i += 1) {
-        groceryMap.avg_covid_level += groceryMap.People[i].covid_level;
+        groceryMap.avg_covid_level += groceryMap.People[i].covid_sum;
         //debugger;
     }
-    groceryMap.avg_covid_level = groceryMap.avg_covid_level / groceryMap.People.length;
-    debuggy(groceryMap.avg_covid_level);
+    
+    // groceryMap.avg_covid_level = groceryMap.avg_covid_level / groceryMap.People.length;
+    recordScore(groceryMap.avg_covid_level.toFixed(2));
     window.requestAnimationFrame(gameLoop);
 }
 
