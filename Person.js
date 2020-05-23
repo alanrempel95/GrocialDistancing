@@ -8,7 +8,7 @@ export default class Person {
         this.personY = Y;
         this.personTurnRad = turn;
         this.direction = 0;
-        this.velocity = 1; //px per frame?
+        this.velocity = 2; //px per frame?
         this.waiting = false;
         this.grocery_list = [];
         this.myMap = myMap,
@@ -376,7 +376,7 @@ export default class Person {
                 if (dist <= groceryMap.targetSeparation){
                     rank += this.covidFunc(dist);
                 }
-                debugger;
+                //debugger;
             }
         }
         return rank;

@@ -84,7 +84,7 @@ export default class storeMap {
         }
         this.floorPlan = myMap.map(function (arr) {
             return arr.slice();
-        });
+        }, this);
         //changeMode(2);
     }
     

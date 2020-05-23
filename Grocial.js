@@ -77,17 +77,29 @@ function setupCanvas(config, currentMap) {
     var startButton = document.getElementById("startSimulation");
     startButton.addEventListener('click', startSimulation);
     
+    //link select map dropdown
+    var mapSelect = document.getElementById("mapSelect");
+    mapSelect.addEventListener("change", changeMap);
+    
     //input copyright
     debuggy(config.copyright);
 }
 
-function linkButtons(currentMap) {
-    //function to add javascript to buttons - must run after map is initialized
-    document.getElementById("changeMode").addEventListener('click', changeMode(1));
-    document.getElementById("populateMap").addEventListener('click', clearMap);
-    document.getElementById("showMap").addEventListener('click', currentMap.showMap(2));
+function changeMap() {
+    var mapSelect = document.getElementById("mapSelect"),
+        selected = "";
+    selected = mapSelect.value;
+    //console.log(mapSelect.value);
+    if (selected === "SNB") {
+        newMap.showMap(2);
+        //startSimulation();
+    } else if (selected === "TJH") {
+        newMap.showMap(1);
+        //startSimulation();
+    } else if (selected === "User") {
+        newMap.populateMap();
+    }
 }
-
 function toggleScreen() {
     "use strict";
     var elem = document.documentElement;
@@ -196,7 +208,7 @@ function startSimulationReal(config, currentMap) {
 
     groceryMap.base_covid_level = 0;
     
-    currentMap.showMap(2);
+    changeMap();
     currentMap.get_goals();
     createPeople(config, currentMap);
     
@@ -241,7 +253,7 @@ async function createPeople(config, currentMap) {
         config.People[i].grocery_list.unshift(entrance);
         config.People[i].grocery_list.push(entrance);
         
-        console.log(JSON.stringify(config.People[i].grocery_list))
+        //console.log(JSON.stringify(config.People[i].grocery_list))
         
         myStart = config.People[i].grocery_list[0];
         myGoal = config.People[i].grocery_list[1];
@@ -268,7 +280,7 @@ function equidistantColors(count) {
                     0.5,
                     Math.sqrt(1.0 - fmod(i * 0.618033988749895, 0.5)));
         hexColors[i] = rgbToHex(colors[i].r, colors[i].g, colors[i].b);
-        console.log(hexColors[i]);
+        //console.log(hexColors[i]);
     }
     return hexColors;
 }
