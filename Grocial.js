@@ -193,6 +193,8 @@ function startSimulationReal(config, currentMap) {
     config.numberOfPeople = parseInt(populationBox.value, 10);
     config.targetSeparation = parseFloat(distanceBox.value);
     config.maskCompliance = maskBox.value;
+
+    groceryMap.base_covid_level = 0;
     
     currentMap.showMap(2);
     currentMap.get_goals();

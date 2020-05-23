@@ -362,7 +362,7 @@ export default class Person {
     }
     
     covidFunc(dist) {
-        return Math.min(0.5, 15.0 / dist);
+        return Math.min(0.5, 15.0 / dist) * (1 - (0.6 * groceryMap.maskCompliance));
     }
     
     covid_rank() {
