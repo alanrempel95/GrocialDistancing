@@ -11,7 +11,8 @@ let groceryMap = {
     maskCompliance: 0,
     base_covid_level: 0,
     avg_covid_level: 0,
-    copyright: "Copyright &copy; 2020 Alan Rempel &amp; Jordan Fernandes."
+    copyright: "Copyright &copy; 2020 Alan Rempel &amp; Jordan Fernandes.",
+    starting: true
 };
 
 let map2 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

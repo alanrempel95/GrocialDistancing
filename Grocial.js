@@ -97,10 +97,10 @@ function changeMap() {
         newMap.showMap(1);
         //startSimulation();
     } else if (selected === "User") {
-        groceryMap.numberOfPeople = 0;
-        groceryMap.People = [];
         newMap.populateMap();
     }
+    groceryMap.numberOfPeople = 0;
+    groceryMap.People = [];
 }
 function toggleScreen() {
     "use strict";
@@ -210,7 +210,11 @@ function startSimulationReal(config, currentMap) {
 
     groceryMap.base_covid_level = 0;
     
-    changeMap();
+    if (config.starting) {
+        changeMap();
+        config.starting = false;
+    }
+    
     currentMap.get_goals();
     createPeople(config, currentMap);
     
